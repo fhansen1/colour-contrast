@@ -387,10 +387,10 @@ function changeConstrastImage(desiredContrast, delta, maxDelta, data){
             colors.push(adjusted[c].r+","+adjusted[c].g+","+adjusted[c].b);
           
            
-            oldC += "<div class ='changed' style='background-color: rgb("+oldColor+");border:3px solid "+bg+";' onclick='copyRGB(this)'>"+i+"</div>";    
+            oldC += "<div class ='changed' style='background-color: rgb("+oldColor+");' onclick='copyRGB(this)'>"+i+"</div>";    
             
             
-            div = "<div class ='changed' style='background-color: rgb("+adjusted[c].r+","+adjusted[c].g+","+adjusted[c].b+");border:3px solid "+bg+";' onclick='copyRGB(this)'>"+i+"</div>";
+            div = "<div class ='changed' style='background-color: rgb("+adjusted[c].r+","+adjusted[c].g+","+adjusted[c].b+");' onclick='copyRGB(this)'>"+i+"</div>";
             html += div;
         
         }
@@ -433,10 +433,11 @@ function copyRGB(element) {
 
 function showDetails(element,i){
     var rgb = getComputedStyle(element).getPropertyValue("background-color");
-    
+    var bg = "rgb("+topDetectedColors[0].r+", "+topDetectedColors[0].g+", "+topDetectedColors[0].b+")";
     document.getElementById('details').style.display = "block";
     document.getElementById('details').style.zIndex = "99";
-    document.getElementById('details').style.background = rgb;
+    document.getElementById('details').style.background = bg;
+
     if(i>0){
         var lum = getBrightness(topDetectedColors[i].r, topDetectedColors[i].g, topDetectedColors[i].b);
         var c = getContrast(lum,lumB);
@@ -447,7 +448,7 @@ function showDetails(element,i){
             v = 100;
         }
         document.getElementById('details').innerHTML += "<div class='info'><p> Colour: "+rgb+"</p><p>Brightness: "+lum.toFixed(2)+"</p><p>Contrast: "+c.toFixed(2)+"</p><p> ΔE*: "+topDetectedColors[i].dE.toFixed(2)+"</p><p>Instances: "+topDetectedColors[i].v+"</p><p>%: "+v.toFixed(2)+"%</p></div>";
-        document.getElementById('details').innerHTML += "<div class='readThis'><p style='color:"+rgb+"'>Can you read this?</p><p style='font-size:20px;color:"+rgb+"'>Can you read this?</p></div>";
+        document.getElementById('details').innerHTML += "<div class='readThis' style='"+bg+";'><p style='font-size:8px;color:"+rgb+"'>Can you read this?</p><p style='color:"+rgb+"'>Can you read this?</p><p style='font-size:30px;color:"+rgb+"'>Can you read this?</p><p style='font-size:40px;color:"+rgb+"'>Can you read this?</p></div>";
     }else{
         document.getElementById('details').innerHTML = "<div class='info'><p><b>Calculated background colour:</b></p><p> Colour: "+rgb+"</p><p>Brightness: "+lumB.toFixed(2)+"</p><p>Instances: "+topDetectedColors[i].v+"</p></div>";
     }
@@ -705,20 +706,7 @@ function hsv2rgb(h,s,v)
   let f= (n,k=(n+h/60)%6) => v - v*s*Math.max( Math.min(k,4-k,1), 0);     
   return [f(5),f(3),f(1)];       
 }  
-function drawHistogram(ar){
-	document.getElementById("histogram").innerHTML = '';
-    document.getElementById("histogram").style.background = "rgb("+ar[0].r+", "+ar[0].g+", "+ar[0].b+")";
-    var html="<p>Detected color palette</p>";
-    var height, div, color;
-    for(i=1;i<ar.length;i++){
-        color = ar[i].r+", "+ar[i].g+", "+ar[i].b;
-        height = (ar[i].v / ar[0].v) * 200;
-      
-        div = "<div style='background-color: rgb("+color+");'>"+i+"</div>";
-        html += div;
-    }
-    document.getElementById('histogram').innerHTML = html;
-}
+
 
 function topColours2lab(top){
     var bg = rgb2lab(top[0].r,top[0].g,top[0].b);
@@ -940,6 +928,24 @@ function ColorPicker(element,r,g,b) {
             ctx.lineTo(x2, y2); 
             ctx.fill();
             ctx.stroke();
+            
+            var strokeColor = 'rgb(0,0,0)';
+            var PI2 = Math.PI * 2;
+            var dx = x2 - x;
+            var dy = y2 - y; 
+            var radians = (Math.atan2(dy, dx) + PI2) % PI2;
+            ctx.save();
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.translate(x2, y2);
+            ctx.rotate(radians);
+            ctx.moveTo(0, 0);
+            ctx.lineTo(-8, 4);
+            ctx.lineTo(-8, -4);
+            ctx.closePath();
+            ctx.fillStyle = strokeColor;
+            ctx.fill();
+            ctx.restore();
             // this.drawArrow(ctx,x,y,x2,y2);
                // console.log(adjusted[red+'.'+g+'.'+b].r); 
         }       

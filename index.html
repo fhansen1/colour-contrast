@@ -28,6 +28,7 @@
 				    <option value="0">Small text</option>
 				    <option value="1">Headline</option>
 				    <option value="2">Logo</option>
+				    <option value="3">Other</option>
 				  </select>
 				</div>
 				<p id="contrastControl">​</p>
@@ -54,9 +55,10 @@
 			<p class="header">Color analysis <img src="q.png" height="14" width="14"></p>
 			<div id="cs" class="color-space"></div>
   			<div id="topColours"><p style="margin-top:40px;">Corrections will appear here</p></div>
-  			
-			<div id="histogram"></div><!-- <p style="height:1px;"></p> -->
-			<div id="suggestion"></div>
+  			<div id="corrections">
+				<div id="histogram"></div><!-- <p style="height:1px;"></p> -->
+				<div id="suggestion"></div>
+			</div>
 			<div id="toast"></div>
 		</div>
 		
@@ -82,6 +84,7 @@ body{
 .noUi-active .noUi-tooltip {
     display: block;
 }
+
 #deltaSliderCombine, #cSlider{
 	width: 90%;
     margin: auto;
@@ -126,16 +129,25 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00000000', e
 	width:40%;
 	height:230px;
 	display: inline-block;
-	float:right;
+	position: absolute;
+	top:0;
+	right:0;
 	background: #fff;
 }
 #details .readThis{
-	width:40%;
+	
+	width:50%;
 	height:230px;
 	display: inline-block;
-	float:left;
-	background: #fff;
+	position: absolute;
+	top:0;
+	left:0;
 	overflow: hidden;
+	text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#details .readThis p{
+	margin-left: 5%;
 }
 #details .info p{
 	margin-left: 5%;
@@ -169,6 +181,8 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00000000', e
     color: #fff;
     margin-left: 5%;
     margin-right: 5%;
+    margin-top: 30px;
+    margin-bottom: 30px;
 }
 #dl{opacity: 0;}
 #data{
@@ -252,27 +266,46 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00000000', e
 	left: 0;
 }
 .row{margin:5%;}
+
+#corrections{
+	width:100%;
+	margin-left: 6px;
+	height:20px;
+	margin-top: -20px;
+}
+#histogram{
+	float:left;
+	margin-left: 10px;
+}
+/*#histogram div{
+	margin-left: 10px;;
+}*/
+/*#suggestion div{
+	margin-right: 10px;
+}*/
+#suggestion{
+	margin-right: 10px;
+	float:right;
+}
 #histogram, #suggestion{
 	display: block;
-	float: left;
 	width: 30%;
     
 }
 #histogram div,#suggestion div{
-	width:30px;
+	width:60px;
 	height:30px;
 	float:left;
 	display: inline-block;
-	margin-left: 9px;
+	margin-bottom: 5px;
+	border-bottom: 1px solid #000000;
 	color:#000000;
 	position: relative;
 }
 #suggestion div:hover, #histogram div:hover{
 	cursor: pointer;
-	width: 32px;
-	height:32px;
-	top: -2px;
-
+	color: #fff;
+	border-bottom: 1px solid #fff;
 }
 
 #histogram div z,#suggestion div z{
@@ -281,11 +314,12 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00000000', e
     right: 5px;
     font-size: 20px;
 }
-/*#histogram div.changed:after,#suggestion div.changed:after{
+#histogram div.changed:after{
 	content: url('right-arrow.png');
 	position: absolute;
-	top:40px;
-}*/
+	left: 95px;
+    margin-top: 4px;
+}
 #filterCanvas{
 	margin-top: 20px;
 }
@@ -303,13 +337,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00000000', e
 	display: inline-block;
 	margin-bottom: 20px;
 }
-/*.slidercontainer div label{
-	padding: 10px;
-}*/
-/*#imageLoader {
- 
-    display: none;
-  }*/
+
 button, ::-webkit-file-upload-button {
   background: #808080;
   color: #fff;
@@ -337,7 +365,7 @@ button, ::-webkit-file-upload-button {
 }
 
 .select-selected {
-  background-color: #25b7d3;
+  background-color: #808080;
 }
 
 /* Style the arrow inside the select element: */
@@ -362,19 +390,19 @@ button, ::-webkit-file-upload-button {
 .select-items div,.select-selected {
   color: #ffffff;
   padding: 8px 16px;
-  border: 1px solid transparent;
-  border-color: transparent transparent rgba(0, 0, 0, 0.1) transparent;
+  border: 1px solid #30bbd4;
   cursor: pointer;
 }
 
 /* Style items (options): */
 .select-items {
   position: absolute;
-  background-color: DodgerBlue;
+  background-color: #808080;
   top: 100%;
   left: 0;
   right: 0;
   z-index: 99;
+  height: 290px;
 }
 
 /* Hide the items when the select box is closed: */
