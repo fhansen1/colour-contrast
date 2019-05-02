@@ -5,8 +5,11 @@
   <link rel="stylesheet" href="tingle/tingle.min.css" />
 </head>
 <body>
+	<div class="header1">
+	<h1>Contrast demo</h1>	
+	</div>
 	<div class="row">
-		<h1>Contrast demo</h1>
+		
 		<div id="con">
 		
 			
@@ -22,7 +25,7 @@
 		</div>	
 		</div>
 		<div id="controls">
-				<p>I am analyzing <img src="q.png" height="14" width="14"></p>
+				<p>I am analyzing <img class='help' src="q.png" height="14" width="14"></p>
 				<div class="custom-select" style="width:90%; margin: 0 auto;">
 				  <select>
 				    <option value="0">Small text</option>
@@ -37,8 +40,9 @@
 	  			<p id="deltaControl">​</p>
 	  			<div id="deltaSliderCombine" type="text"></div>
 				
-				<p>Simulate visual impairment <img src="q.png" height="14" width="14"></p>
-				<button type="button">Toggle</button>
+				<p>Simulate visual impairment <img class='help' src="q.png" height="14" width="14"></p>
+				<!-- <button type="button">Toggle</button> -->
+				<button class="tingle-btn tingle-btn--primary">Toggle</button>
 		</div>
 		<div class="analyzer">
 			<div id="details" style="display:none">
@@ -52,7 +56,7 @@
 			</div>
 		</div>	
 		<div id="data">
-			<p class="header">Color analysis <img src="q.png" height="14" width="14"></p>
+			<p class="header">Color analysis <img class='help' src="q.png" height="14" width="14"></p>
 			<div id="cs" class="color-space"></div>
   			<div id="topColours"><p style="margin-top:40px;">Corrections will appear here</p></div>
   			<div id="corrections">
@@ -75,8 +79,25 @@
 <!-- <script src="convert.js"></script>
 <script src="diff.js"></script> -->
 <style>
+.help:hover{
+	cursor: pointer;
+}
+.tingle-btn--primary {
+	background: #30bbd4;
+}
+.header1{
+	
+    background: grey;
+    height: 100px;
+    border: 1px solid black;
+    color: #ffffff;
+}
+.header1 h1{
+	margin-left: 5%;
+}
 body{
-	background: #a9a9a9;
+	background: #b5b5b5;
+	margin:0;
 }
 .noUi-tooltip {
     display: none;
@@ -115,6 +136,9 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00000000', e
 	background: #808080;
 	margin-right: 5%;
 	border: 1px solid #4c4c4c;
+}
+#controls .tingle-btn--primary {
+	margin-bottom: 20px;
 }
 #details{
 	width: 100%;
@@ -265,7 +289,11 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00000000', e
 	top: 0;
 	left: 0;
 }
-.row{margin:5%;}
+.row{
+	margin-left: 5%;
+	margin-right: 5%;
+	margin-top:30px;
+}
 
 #corrections{
 	width:100%;
@@ -402,7 +430,7 @@ button, ::-webkit-file-upload-button {
   left: 0;
   right: 0;
   z-index: 99;
-  height: 290px;
+  height: 350px;
 }
 
 /* Hide the items when the select box is closed: */

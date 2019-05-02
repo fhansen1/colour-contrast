@@ -354,8 +354,8 @@ function changeConstrastImage(desiredContrast, delta, maxDelta, data){
    
     oCtx.putImageData(imgData,rect.x,rect.y);
     adjusted = adjusted.sort(function(a, b) { return b.v - a.v;});
-    // console.log("**adjusted");
-    // console.log(adjusted);
+    console.log("**adjusted");
+    console.log(adjusted);
     var div, oldC="", detectedColours=""; var oldColor; document.getElementById("suggestion").innerHTML = ""; 
     var html = "";
     // html += "<p>Suggested foreground colors</p>";
@@ -380,23 +380,23 @@ function changeConstrastImage(desiredContrast, delta, maxDelta, data){
         pick.plotRgb(topDetectedColors[i].r, topDetectedColors[i].g, topDetectedColors[i].b, i);
         oldColor = topDetectedColors[i].r+","+topDetectedColors[i].g+","+topDetectedColors[i].b;
         
-        var c = topDetectedColors[i].r+"."+topDetectedColors[i].g+"."+topDetectedColors[i].b ;
+        var c = topDetectedColors[i].r+"."+topDetectedColors[i].g+"."+topDetectedColors[i].b;
         
         if( adjusted[c] != undefined){
             detectedColours+="<div class='detected' style='background-color: rgb("+oldColor+"); height:"+h+"px' onclick='copyRGB(this)' onmouseover='showDetails(this,"+i+")' onmouseout='hideDetails(this)'>"+i+"</div>";
             colors.push(adjusted[c].r+","+adjusted[c].g+","+adjusted[c].b);
           
            
-            oldC += "<div class ='changed' style='background-color: rgb("+oldColor+");' onclick='copyRGB(this)'>"+i+"</div>";    
+            oldC += "<div class ='changed' style='background-color: rgb("+oldColor+");' onclick='copyRGB(this)' onmouseover='showDetails(this,"+i+")' onmouseout='hideDetails(this)'>"+i+"</div>";    
             
             
-            div = "<div class ='changed' style='background-color: rgb("+adjusted[c].r+","+adjusted[c].g+","+adjusted[c].b+");' onclick='copyRGB(this)'>"+i+"</div>";
+            div = "<div class ='changed' style='background-color: rgb("+adjusted[c].r+","+adjusted[c].g+","+adjusted[c].b+");' onclick='copyRGB(this)' onmouseover='showDetails(this,"+i+",a)' onmouseout='hideDetails(this)'>"+i+"</div>";
             html += div;
         
         }
         else{
             var color = "rgb("+Math.abs(topDetectedColors[i].r-255) + "," + Math.abs(topDetectedColors[i].g-255) + "," + Math.abs(topDetectedColors[i].b)-255+")";
-            detectedColours+="<div style='background-color: rgb("+oldColor+"); height:"+h+"px' onclick='copyRGB(this)' onmouseover='showDetails(this,"+i+")' onmouseout='hideDetails(this)''>"+i+"</div>";
+            detectedColours+="<div style='background-color: rgb("+oldColor+"); height:"+h+"px' onclick='copyRGB(this)' onmouseover='showDetails(this,"+i+")' onmouseout='hideDetails(this)'>"+i+"</div>";
             div+="<div style='background-color: rgb("+oldColor+");border:3px solid "+bg+";color:"+color+";' onclick='copyRGB(this)'>"+i+"<br><z>✔</z></div>";
             
             // div += "<div style='background-color: rgb("+topDetectedColors[i].r+","+topDetectedColors[i].g+","+topDetectedColors[i].b+");border:3px solid "+bg+";color:"+color+";' onclick='copyRGB(this)'>"+i+"</div>";
@@ -405,13 +405,10 @@ function changeConstrastImage(desiredContrast, delta, maxDelta, data){
 
     
     document.getElementById('topColours').innerHTML = detectedColours;
-    
-        document.getElementById('histogram').innerHTML = oldC;
-    
-    
+    document.getElementById('histogram').innerHTML = oldC;
     document.getElementById('suggestion').innerHTML = html;
+    
     var end = new Date().valueOf();
-
     console.log("bench: "+(end-start) );
     
 }
@@ -431,7 +428,7 @@ function copyRGB(element) {
    
 }
 
-function showDetails(element,i){
+function showDetails(element,i,a){
     var rgb = getComputedStyle(element).getPropertyValue("background-color");
     var bg = "rgb("+topDetectedColors[0].r+", "+topDetectedColors[0].g+", "+topDetectedColors[0].b+")";
     document.getElementById('details').style.display = "block";
@@ -440,6 +437,14 @@ function showDetails(element,i){
 
     if(i>0){
         var lum = getBrightness(topDetectedColors[i].r, topDetectedColors[i].g, topDetectedColors[i].b);
+        var delta = topDetectedColors[i].dE.toFixed(2);
+        if(a){
+            var c = topDetectedColors[i].r+"."+topDetectedColors[i].g+"."+topDetectedColors[i].b;
+            delta = ciede2000( rgb2lab(adjusted[c].r, adjusted[c].g, adjusted[c].b), rgb2lab(topDetectedColors[0].r, topDetectedColors[0].g, topDetectedColors[0].b));
+            delta = delta.toFixed(2);
+            lum = getBrightness(adjusted[c].r, adjusted[c].g, adjusted[c].b);
+        }
+        
         var c = getContrast(lum,lumB);
         var v = topDetectedColors[i].v;
         if(i > 1){
@@ -447,13 +452,14 @@ function showDetails(element,i){
         }else{
             v = 100;
         }
-        document.getElementById('details').innerHTML += "<div class='info'><p> Colour: "+rgb+"</p><p>Brightness: "+lum.toFixed(2)+"</p><p>Contrast: "+c.toFixed(2)+"</p><p> ΔE*: "+topDetectedColors[i].dE.toFixed(2)+"</p><p>Instances: "+topDetectedColors[i].v+"</p><p>%: "+v.toFixed(2)+"%</p></div>";
+        document.getElementById('details').innerHTML += "<div class='info'><p> Colour: "+rgb+"</p><p>Brightness: "+lum.toFixed(2)+"</p><p>Contrast: "+c.toFixed(2)+"</p><p> ΔE*: "+delta+"</p><p>Instances: "+topDetectedColors[i].v+"</p><p>%: "+v.toFixed(2)+"%</p></div>";
         document.getElementById('details').innerHTML += "<div class='readThis' style='"+bg+";'><p style='font-size:8px;color:"+rgb+"'>Can you read this?</p><p style='color:"+rgb+"'>Can you read this?</p><p style='font-size:30px;color:"+rgb+"'>Can you read this?</p><p style='font-size:40px;color:"+rgb+"'>Can you read this?</p></div>";
     }else{
         document.getElementById('details').innerHTML = "<div class='info'><p><b>Calculated background colour:</b></p><p> Colour: "+rgb+"</p><p>Brightness: "+lumB.toFixed(2)+"</p><p>Instances: "+topDetectedColors[i].v+"</p></div>";
     }
 }
 function hideDetails(element){
+
     document.getElementById('details').style.display = "none";
     document.getElementById('details').style.zIndex = "-1";
     document.getElementById('details').innerHTML = "";
@@ -1137,14 +1143,14 @@ deltaMinMaxSlider.noUiSlider.on('end', function (values, handle) {
     var value = values[handle];
     dMinSlider = Math.round( this.get()[0] );
     dMaxSlider = Math.round( this.get()[1] );
-    document.getElementById("deltaControl").innerHTML = "ΔE* range: ["+dMinSlider+", "+dMaxSlider+"]<img src='q.png' height='14' width='14'>";
+    document.getElementById("deltaControl").innerHTML = "ΔE* range: ["+dMinSlider+", "+dMaxSlider+"]<img class='help' src='q.png' height='14' width='14' onclick='deltaModal.open()'>";
     if(imageObj){
         imageHistogram( offscreenContext, cSlider, dMinSlider, dMaxSlider);
     } 
     
 });
-document.getElementById("contrastControl").innerHTML = "Contrast: "+cSlider+"<img src='q.png' height='14' width='14'>"; 
-document.getElementById("deltaControl").innerHTML = "ΔE* range: ["+dMinSlider+", "+dMaxSlider+"]<img src='q.png' height='14' width='14'>"; 
+document.getElementById("contrastControl").innerHTML = "Contrast: "+cSlider+"<img class='help' src='q.png' height='14' width='14'>"; 
+document.getElementById("deltaControl").innerHTML = "ΔE* range: ["+dMinSlider+", "+dMaxSlider+"]<img class='help' src='q.png' height='14' width='14' onclick='deltaModal.open()'>"; 
 
 var contrastSlider = document.getElementById('cSlider');
 
@@ -1161,7 +1167,7 @@ contrastSlider.noUiSlider.on('end', function (values, handle) {
 
     var value = values[handle];
     cSlider = this.get()[0];
-    document.getElementById("contrastControl").innerHTML = "Contrast: "+cSlider+"<img src='q.png' height='14' width='14'>";
+    document.getElementById("contrastControl").innerHTML = "Contrast: "+cSlider+"<img class='help' src='q.png' height='14' width='14'>";
     if(imageObj){
         imageHistogram( offscreenContext, cSlider, dMinSlider, dMaxSlider);
     }
@@ -1240,46 +1246,23 @@ function closeAllSelect(elmnt) {
 
 /* If the user clicks anywhere outside the select box,
 then close all select boxes: */
-document.addEventListener("click", closeAllSelect);
-// instanciate new modal
-// var modal = new tingle.modal({
-//     footer: true,
-//     stickyFooter: false,
-//     closeMethods: ['overlay', 'button', 'escape'],
-//     closeLabel: "Close",
-//     cssClass: ['custom-class-1', 'custom-class-2'],
-//     onOpen: function() {
-//         console.log('modal open');
-//     },
-//     onClose: function() {
-//         console.log('modal closed');
-//     },
-//     beforeClose: function() {
-//         // here's goes some logic
-//         // e.g. save content before closing the modal
-//         return true; // close the modal
-//         return false; // nothing happens
-//     }
-// });
+// document.addEventListener("click", closeAllSelect);
+// instanciate new deltaModal
+var deltaModal = new tingle.modal({
+    footer: true,
+    stickyFooter: false,
+    closeMethods: ['overlay', 'button', 'escape'],
+    closeLabel: "Close"
+});
 
-// // set content
-// modal.setContent('<h1>here\'s some content</h1>');
+// set content
+deltaModal.setContent('<h1>This is how the delta works</h1>');
 
-// // add a button
-// modal.addFooterBtn('Button label', 'tingle-btn tingle-btn--primary', function() {
-//     // here goes some logic
-//     modal.close();
-// });
+// add a button
+deltaModal.addFooterBtn('OK', 'tingle-btn tingle-btn--primary', function() {
+    // here goes some logic
+    deltaModal.close();
+});
 
-// // add another button
-// modal.addFooterBtn('Dangerous action !', 'tingle-btn tingle-btn--danger', function() {
-//     // here goes some logic
-//     modal.close();
-// });
 
-// // open modal
-// modal.open();
-
-// // close modal
-// modal.close();
-//             
+            
