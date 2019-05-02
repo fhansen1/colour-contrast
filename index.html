@@ -1,6 +1,8 @@
 <html>
 <head>
   <meta charset="UTF-8">
+  <link rel="stylesheet" href="noUiSlider/nouislider.min.css" />
+  <link rel="stylesheet" href="tingle/tingle.min.css" />
 </head>
 <body>
 	<div class="row">
@@ -19,70 +21,151 @@
 			</a>
 		</div>	
 		</div>
+		<div id="controls">
+				<p>I am analyzing <img src="q.png" height="14" width="14"></p>
+				<div class="custom-select" style="width:90%; margin: 0 auto;">
+				  <select>
+				    <option value="0">Small text</option>
+				    <option value="1">Headline</option>
+				    <option value="2">Logo</option>
+				  </select>
+				</div>
+				<p id="contrastControl">​</p>
+	  			<div id="cSlider" type="text"></div>
 
-		<div class="analyzer">
-		<canvas id="imageCanvas" width="550" height="550"></canvas>
-		<canvas id="oCanvas" width="550" height="550"></canvas>
-		<div id="design">
-		<p>Awaiting design for analysis</p>
-		<p class="info">Move the dashed rectangle to analyse an area</p>
+	  			<p id="deltaControl">​</p>
+	  			<div id="deltaSliderCombine" type="text"></div>
+				
+				<p>Simulate visual impairment <img src="q.png" height="14" width="14"></p>
+				<button type="button">Toggle</button>
 		</div>
+		<div class="analyzer">
+			<div id="details" style="display:none">
+				<div class="info"></div>
+			</div>
+			<canvas id="imageCanvas" width="550" height="550"></canvas>
+			<canvas id="oCanvas" width="550" height="550"></canvas>
+			<div id="design">
+			<p>Awaiting design for analysis</p>
+			<p class="info">Move the dashed rectangle to analyse an area</p>
+			</div>
 		</div>	
 		<div id="data">
-			<div>
-				<p id="sliderAmount">​</p>
-	  			<input type="range" step="0.5" min="1" max="20" value="3" class="slider" id="contrastSlider" onchange="updateContrastSlider(this.value)">
-  			</div>
-  			<div>
-	  			<p id="sliderDeltaAmount">​</p>
-	  			<input type="range" step="0.5" min="0.5" max="40" value="6" class="slider" id="deltaSlider" onchange="updateDeltaSlider(this.value)">
-			</div>
-			<div>
-	  			<p id="sliderDeltaAmountMax">​</p>
-	  			<input type="range" step="0.5" min="0.5" max="60" value="40" class="slider" id="deltaSliderMax" onchange="updateDeltaSliderMax(this.value)">
-			</div>
-			<p class="header">Color analysis</p>
+			<p class="header">Color analysis <img src="q.png" height="14" width="14"></p>
 			<div id="cs" class="color-space"></div>
+  			<div id="topColours"><p style="margin-top:40px;">Corrections will appear here</p></div>
+  			
 			<div id="histogram"></div><!-- <p style="height:1px;"></p> -->
 			<div id="suggestion"></div>
 			<div id="toast"></div>
 		</div>
-		<div id="desc">
-			<p>Contrast is calculated according to <a href="https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html" target="_blank">WCAG2.0</a> standards</p>
-			<p><a href="https://en.wikipedia.org/wiki/Color_difference#CIELAB_%CE%94E*" target="_blank">ΔE*</a> is the perceptual difference between foreground and background</p><br>
-			<p><b>The outer circle:</b><br> Hue of the detected foreground colors</p>
-			<p><b>The middle circle:</b><br> Detected background color</p>
-			<p><b>The inner circle:</b><br> The brightness of the background color</p>
-			
-			<p>The resulting foreground colors, checkmarks indicate an unchanged foreground color</p>
-			<p>Arrows indicate changed colors</p>
-			<p>Click any of the detected or suggested colors to copy their RGB values</p>
-		</div>
+		
 		
 	</div>
 
 
 </body>
-<script src="vue.js"></script>
+<script src="noUiSlider/nouislider.min.js" ></script>
+<script src="tingle/tingle.min.js" ></script>
+<!-- <script src="vue.js"></script> -->
 <script src="test.js"></script>
+
 <!-- <script src="convert.js"></script>
 <script src="diff.js"></script> -->
 <style>
 body{
 	background: #a9a9a9;
 }
-#desc{
+.noUi-tooltip {
+    display: none;
+}
+.noUi-active .noUi-tooltip {
+    display: block;
+}
+#deltaSliderCombine, #cSlider{
+	width: 90%;
+    margin: auto;
+}
+#deltaSliderCombine{
+	/* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#2ebad5+1,fffdae+100 */
+background: rgb(46,186,213); /* Old browsers */
+background: -moz-linear-gradient(left, rgba(46,186,213,1) 1%, rgba(255,253,174,1) 100%); /* FF3.6-15 */
+background: -webkit-linear-gradient(left, rgba(46,186,213,1) 1%,rgba(255,253,174,1) 100%); /* Chrome10-25,Safari5.1-6 */
+background: linear-gradient(to right, rgba(46,186,213,1) 1%,rgba(255,253,174,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#2ebad5', endColorstr='#fffdae',GradientType=1 ); /* IE6-9 */
+}
+#deltaSliderCombine .noUi-connect {
+	background:#66676780;
+}
+#cSlider{
+	/* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#000000+0,000000+100&0+0,1+100 */
+background: -moz-linear-gradient(left, rgba(0,0,0,0) 0%, rgba(0,0,0,1) 100%); /* FF3.6-15 */
+background: -webkit-linear-gradient(left, rgba(0,0,0,0) 0%,rgba(0,0,0,1) 100%); /* Chrome10-25,Safari5.1-6 */
+background: linear-gradient(to right, rgba(0,0,0,0) 0%,rgba(0,0,0,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00000000', endColorstr='#000000',GradientType=1 ); /* IE6-9 */
+}
+#controls{
 	width:240px;
-	height: 550px;
+	max-height: 550px;
 	display: inline-block;
 	float:left;
 	background: #808080;
-	margin-left: 5%;
-	opacity: 0;
+	margin-right: 5%;
+	border: 1px solid #4c4c4c;
 }
-#desc p{
-	text-align: center;
-    font-size: 16px;
+#details{
+	width: 100%;
+	height: 230px;
+	background: red;
+	position: absolute;
+	top:0px;
+	left:0;
+	
+}
+#details .info{
+	width:40%;
+	height:230px;
+	display: inline-block;
+	float:right;
+	background: #fff;
+}
+#details .readThis{
+	width:40%;
+	height:230px;
+	display: inline-block;
+	float:left;
+	background: #fff;
+	overflow: hidden;
+}
+#details .info p{
+	margin-left: 5%;
+}
+#topColours{
+	width: 100%;
+    clear: both;
+    margin-top: 10px;
+    margin-bottom: 50px;
+    margin-left: -3%;
+    text-align: center;
+    color: #000000;
+}
+#topColours div{
+	display: inline-block;
+    margin-left: 10px;
+    width: 30px;
+    height: 30px;
+    border-bottom: 1px solid black;
+    vertical-align: bottom;
+}
+#topColours div:hover{
+	
+    border-bottom: 1px solid #fff;
+    color: #fff;
+    cursor: pointer;
+}
+
+#controls p{
+    font-size: 20px;
     color: #fff;
     margin-left: 5%;
     margin-right: 5%;
@@ -96,8 +179,8 @@ body{
     background: gray;
     color: #fff;
     width:240px;
-    height:540px;
-    opacity: 0;
+    max-height:540px;
+    border: 1px solid #4c4c4c;
     position: relative;
 }
 #data p.header{
@@ -135,6 +218,7 @@ body{
 	height: 550px; 
 	width: 550px;
 	float: left;
+	border: 1px solid #4c4c4c;
 }
 #oCanvas{
 	background: transparent;
@@ -151,6 +235,7 @@ body{
 	background-position: center center;
 	background-repeat: no-repeat;
 	z-index: 7;
+	
 }
 #design p{
 	text-align: center;
@@ -196,19 +281,19 @@ body{
     right: 5px;
     font-size: 20px;
 }
-#histogram div.changed:after,#suggestion div.changed:after{
+/*#histogram div.changed:after,#suggestion div.changed:after{
 	content: url('right-arrow.png');
 	position: absolute;
 	top:40px;
-}
+}*/
 #filterCanvas{
 	margin-top: 20px;
 }
 .color-space {
-    width: 150px;
-    height: 150px;
-    margin-left: 47px;
-    display: inline-block;
+    width: 200px;
+    height: 200px;
+    margin: auto;
+    display: block;
 }
 .slidecontainer{
 	width: 550px;
@@ -241,93 +326,64 @@ button, ::-webkit-file-upload-button {
 	bottom: 0;
 	margin-top:5px;
 }
-input[type=range] {
-  -webkit-appearance: none;
-  
-  width: 80%;
+
+/* The container must be positioned relative: */
+.custom-select {
+  position: relative;
 }
-input[type=range]:focus {
-  outline: none;
+
+.custom-select select {
+  display: none; /*hide original SELECT element: */
 }
-input[type=range]::-webkit-slider-runnable-track {
-  width: 100%;
-  height: 3.4px;
-  cursor: pointer;
-  animate: 0.2s;
-  
-  background: #fff;
-  border-radius: 1.3px;
-  border: 0.2px solid #010101;
+
+.select-selected {
+  background-color: #25b7d3;
 }
-input[type=range]::-webkit-slider-thumb {
-  
-  border: 1px solid #000000;
-  height: 20px;
-  width: 8px;
-  border-radius: 3px;
-  background: #ffffff;
-  cursor: pointer;
-  -webkit-appearance: none;
-  margin-top: -8px;
+
+/* Style the arrow inside the select element: */
+.select-selected:after {
+  position: absolute;
+  content: "";
+  top: 14px;
+  right: 10px;
+  width: 0;
+  height: 0;
+  border: 6px solid transparent;
+  border-color: #fff transparent transparent transparent;
 }
-input[type=range]:focus::-webkit-slider-runnable-track {
-  background: #367ebd;
+
+/* Point the arrow upwards when the select box is open (active): */
+.select-selected.select-arrow-active:after {
+  border-color: transparent transparent #fff transparent;
+  top: 7px;
 }
-input[type=range]::-moz-range-track {
-  width: 100%;
-  height: 8.4px;
-  cursor: pointer;
-  animate: 0.2s;
-  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
-  background: #3071a9;
-  border-radius: 1.3px;
-  border: 0.2px solid #010101;
-}
-input[type=range]::-moz-range-thumb {
-  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
-  border: 1px solid #000000;
-  height: 36px;
-  width: 16px;
-  border-radius: 3px;
-  background: #ffffff;
+
+/* style the items (options), including the selected item: */
+.select-items div,.select-selected {
+  color: #ffffff;
+  padding: 8px 16px;
+  border: 1px solid transparent;
+  border-color: transparent transparent rgba(0, 0, 0, 0.1) transparent;
   cursor: pointer;
 }
-input[type=range]::-ms-track {
-  width: 100%;
-  height: 8.4px;
-  cursor: pointer;
-  animate: 0.2s;
-  background: transparent;
-  border-color: transparent;
-  border-width: 16px 0;
-  color: transparent;
+
+/* Style items (options): */
+.select-items {
+  position: absolute;
+  background-color: DodgerBlue;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 99;
 }
-input[type=range]::-ms-fill-lower {
-  background: #2a6495;
-  border: 0.2px solid #010101;
-  border-radius: 2.6px;
-  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
+
+/* Hide the items when the select box is closed: */
+.select-hide {
+  display: none;
 }
-input[type=range]::-ms-fill-upper {
-  background: #3071a9;
-  border: 0.2px solid #010101;
-  border-radius: 2.6px;
-  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
-}
-input[type=range]::-ms-thumb {
-  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
-  border: 1px solid #000000;
-  height: 36px;
-  width: 16px;
-  border-radius: 3px;
-  background: #ffffff;
-  cursor: pointer;
-}
-input[type=range]:focus::-ms-fill-lower {
-  background: #3071a9;
-}
-input[type=range]:focus::-ms-fill-upper {
-  background: #367ebd;
+
+.select-items div:hover, .same-as-selected {
+  background-color: rgba(0, 0, 0, 0.1);
 }
 </style>
 </html>

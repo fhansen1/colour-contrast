@@ -6,6 +6,7 @@ var ctx = canvas.getContext('2d');
 var renderableHeight, renderableWidth;
 var histogram = [];
 var topDetectedColors = [];
+var adjusted = [];
 var start;
 var colorsToChange=[];
 var alreadyIn=[];
@@ -18,6 +19,9 @@ var dragok = false;
 var myopacity = 0;
 var startX;
 var startY;
+var lumB;
+var dMaxSlider = 80, dMinSlider = 15, cSlider = 3;
+var imageObj;
 var iBg = {r:0, g:0, b:0};
 var rect = {
     x: oWidth/3,
@@ -29,7 +33,7 @@ var rect = {
 oCanvas.onmousedown = myDown;
 oCanvas.onmouseup = myUp;
 oCanvas.onmousemove = myMove;
-
+var pick = new ColorPicker(document.querySelector('.color-space'));
 
 // redraw the scene
 function draw() {
@@ -69,7 +73,7 @@ function myUp(e) {
     // clear all the dragging flags
     dragok = false;
     rect.isDragging = false;
-    imageHistogram( offscreenContext, document.getElementById('contrastSlider').value, document.getElementById('deltaSlider').value, document.getElementById('deltaSliderMax').value );
+    imageHistogram( offscreenContext, cSlider, dMinSlider, dMaxSlider);
 }
 
 
@@ -137,7 +141,7 @@ function handleImage(e){
     var reader = new FileReader();
     
     reader.onload = function(event){
-        var imageObj = new Image();
+        imageObj = new Image();
        
         imageObj.onload = function(){
 
@@ -181,8 +185,10 @@ function handleImage(e){
             document.getElementById("design").setAttribute("style", "display: none;");
             
             fadeOpacity();
+           
+            imageHistogram( offscreenContext, cSlider, dMinSlider, dMaxSlider );
             
-            imageHistogram( offscreenContext, document.getElementById('contrastSlider').value, document.getElementById('deltaSlider').value, document.getElementById('deltaSliderMax').value );
+           
             
             
         };
@@ -195,9 +201,9 @@ function fadeOpacity() {
       myopacity += .075;
      setTimeout(function(){fadeOpacity()},100);
    }
-   document.getElementById('data').style.opacity = myopacity;
-   document.getElementById('dl').style.opacity = myopacity;
-   document.getElementById('desc').style.opacity = myopacity;
+   // document.getElementById('data').style.opacity = myopacity;
+   // document.getElementById('dl').style.opacity = myopacity;
+   // document.getElementById('desc').style.opacity = myopacity;
 }
 //main method for now
 function imageHistogram(canvasImg, zC, zD, zDmax){
@@ -284,7 +290,12 @@ function changeConstrastImage(desiredContrast, delta, maxDelta, data){
     fCtx.putImageData(data, 0, 0);
     
     var bgLab = rgb2lab(topDetectedColors[0].r,topDetectedColors[0].g,topDetectedColors[0].b);
-    var lumB = getBrightness(topDetectedColors[0].r,topDetectedColors[0].g,topDetectedColors[0].b);
+    var fgLab;
+    if(topDetectedColors[1] != undefined){
+        fgLab = rgb2lab(topDetectedColors[1].r,topDetectedColors[1].g,topDetectedColors[1].b);
+    }
+    
+    lumB = getBrightness(topDetectedColors[0].r,topDetectedColors[0].g,topDetectedColors[0].b);
     var lumF, contrast, tmpKeys = [];  
     
     for (var i = 0; i < imgData.data.length; i+=4) {
@@ -300,9 +311,9 @@ function changeConstrastImage(desiredContrast, delta, maxDelta, data){
                 var lab = rgb2lab(r,g,b);
                 lumF = getBrightness(r,g,b);
                 contrast = getContrast(lumF,lumB);
-                // console.log(lab);
+               
                 //comparing similarity with the top 10 colors
-                if( (ciede2000(lab,bgLab) > delta) && (ciede2000(lab,bgLab) < maxDelta) && (desiredContrast > contrast)) {
+                if( (ciede2000(lab,bgLab) > delta) && (ciede2000(lab,fgLab) < maxDelta) && (desiredContrast > contrast)) {
                    
                     
                     var newRgb = adjustLightness(desiredContrast, lab, lumF, lumB, r, g, b) ;
@@ -343,46 +354,61 @@ function changeConstrastImage(desiredContrast, delta, maxDelta, data){
    
     oCtx.putImageData(imgData,rect.x,rect.y);
     adjusted = adjusted.sort(function(a, b) { return b.v - a.v;});
-   
-    var div, div2=""; var oldColor; document.getElementById("suggestion").innerHTML = ""; 
+    // console.log("**adjusted");
+    // console.log(adjusted);
+    var div, oldC="", detectedColours=""; var oldColor; document.getElementById("suggestion").innerHTML = ""; 
     var html = "";
     // html += "<p>Suggested foreground colors</p>";
-    // div2 += "<p>Detected foreground colors</p>";
+    // detectedColours += "<p>Detected foreground colors</p>";
     
     var bg = "rgb("+topDetectedColors[0].r+","+topDetectedColors[0].g+","+topDetectedColors[0].b+")";
     var htmlcontrast; var colors=[];
 
     document.getElementById("cs").innerHTML = '';
 
-    var pick = new ColorPicker(document.querySelector('.color-space'), topDetectedColors[0].r, topDetectedColors[0].g, topDetectedColors[0].b);
-
-    var m = (10 - i) / 3;
-    pick.plotBg(topDetectedColors[0].r, topDetectedColors[0].g, topDetectedColors[0].b, m);  
-
+    pick = new ColorPicker(document.querySelector('.color-space'));
+    var h = 50;
+    
+    pick.plotBg(topDetectedColors[0].r, topDetectedColors[0].g, topDetectedColors[0].b);  
+    detectedColours+="<div style='background-color: "+bg+"; height:50px;' onclick='copyRGB(this)' onmouseover='showDetails(this,0)' onmouseout='hideDetails(this)'>BG</div>";
     for(i=1;i<topDetectedColors.length;i++){
 
-        pick.plotRgb(topDetectedColors[i].r, topDetectedColors[i].g, topDetectedColors[i].b, m);
+        if(i > 5){
+            break;
+        }
+        h = h - (h*0.15);
+        pick.plotRgb(topDetectedColors[i].r, topDetectedColors[i].g, topDetectedColors[i].b, i);
         oldColor = topDetectedColors[i].r+","+topDetectedColors[i].g+","+topDetectedColors[i].b;
-        
         
         var c = topDetectedColors[i].r+"."+topDetectedColors[i].g+"."+topDetectedColors[i].b ;
         
         if( adjusted[c] != undefined){
-            div2+="<div style='background-color: rgb("+oldColor+");border:3px solid "+bg+";' onclick='copyRGB(this)'>"+i+"</div>";
+            detectedColours+="<div class='detected' style='background-color: rgb("+oldColor+"); height:"+h+"px' onclick='copyRGB(this)' onmouseover='showDetails(this,"+i+")' onmouseout='hideDetails(this)'>"+i+"</div>";
             colors.push(adjusted[c].r+","+adjusted[c].g+","+adjusted[c].b);
+          
+           
+            oldC += "<div class ='changed' style='background-color: rgb("+oldColor+");border:3px solid "+bg+";' onclick='copyRGB(this)'>"+i+"</div>";    
+            
+            
             div = "<div class ='changed' style='background-color: rgb("+adjusted[c].r+","+adjusted[c].g+","+adjusted[c].b+");border:3px solid "+bg+";' onclick='copyRGB(this)'>"+i+"</div>";
             html += div;
         
-        }else{
+        }
+        else{
             var color = "rgb("+Math.abs(topDetectedColors[i].r-255) + "," + Math.abs(topDetectedColors[i].g-255) + "," + Math.abs(topDetectedColors[i].b)-255+")";
-            div2+="<div style='background-color: rgb("+oldColor+");border:3px solid "+bg+";color:"+color+";' onclick='copyRGB(this)'>"+i+"<br><z>✔</z></div>";
+            detectedColours+="<div style='background-color: rgb("+oldColor+"); height:"+h+"px' onclick='copyRGB(this)' onmouseover='showDetails(this,"+i+")' onmouseout='hideDetails(this)''>"+i+"</div>";
+            div+="<div style='background-color: rgb("+oldColor+");border:3px solid "+bg+";color:"+color+";' onclick='copyRGB(this)'>"+i+"<br><z>✔</z></div>";
             
-            html += "<div style='background-color: rgb("+topDetectedColors[i].r+","+topDetectedColors[i].g+","+topDetectedColors[i].b+");border:3px solid "+bg+";color:"+color+";' onclick='copyRGB(this)'>"+i+"</div>";
+            // div += "<div style='background-color: rgb("+topDetectedColors[i].r+","+topDetectedColors[i].g+","+topDetectedColors[i].b+");border:3px solid "+bg+";color:"+color+";' onclick='copyRGB(this)'>"+i+"</div>";
         }
     }
 
     
-    document.getElementById('histogram').innerHTML = div2;
+    document.getElementById('topColours').innerHTML = detectedColours;
+    
+        document.getElementById('histogram').innerHTML = oldC;
+    
+    
     document.getElementById('suggestion').innerHTML = html;
     var end = new Date().valueOf();
 
@@ -405,52 +431,33 @@ function copyRGB(element) {
    
 }
 
-updateContrastSlider(document.getElementById("contrastSlider").value);
-updateDeltaSlider(document.getElementById("deltaSlider").value);
-updateDeltaSliderMax(document.getElementById("deltaSliderMax").value);
+function showDetails(element,i){
+    var rgb = getComputedStyle(element).getPropertyValue("background-color");
+    
+    document.getElementById('details').style.display = "block";
+    document.getElementById('details').style.zIndex = "99";
+    document.getElementById('details').style.background = rgb;
+    if(i>0){
+        var lum = getBrightness(topDetectedColors[i].r, topDetectedColors[i].g, topDetectedColors[i].b);
+        var c = getContrast(lum,lumB);
+        var v = topDetectedColors[i].v;
+        if(i > 1){
+            v = ( v / topDetectedColors[1].v ) * 100;
+        }else{
+            v = 100;
+        }
+        document.getElementById('details').innerHTML += "<div class='info'><p> Colour: "+rgb+"</p><p>Brightness: "+lum.toFixed(2)+"</p><p>Contrast: "+c.toFixed(2)+"</p><p> ΔE*: "+topDetectedColors[i].dE.toFixed(2)+"</p><p>Instances: "+topDetectedColors[i].v+"</p><p>%: "+v.toFixed(2)+"%</p></div>";
+        document.getElementById('details').innerHTML += "<div class='readThis'><p style='color:"+rgb+"'>Can you read this?</p><p style='font-size:20px;color:"+rgb+"'>Can you read this?</p></div>";
+    }else{
+        document.getElementById('details').innerHTML = "<div class='info'><p><b>Calculated background colour:</b></p><p> Colour: "+rgb+"</p><p>Brightness: "+lumB.toFixed(2)+"</p><p>Instances: "+topDetectedColors[i].v+"</p></div>";
+    }
+}
+function hideDetails(element){
+    document.getElementById('details').style.display = "none";
+    document.getElementById('details').style.zIndex = "-1";
+    document.getElementById('details').innerHTML = "";
+}
 
-function updateContrastSlider(slideAmount) {
-    var sliderDiv = document.getElementById("sliderAmount");
-    sliderDiv.innerHTML = "<b>Contrast:</b> "+slideAmount;
-    if( (slideAmount >= 3) && (slideAmount < 7) ){
-        sliderDiv.innerHTML = "<b>Contrast:</b> "+slideAmount+" <i>AA</i>";
-    }
-    if(slideAmount >= 7){
-        sliderDiv.innerHTML = "<b>Contrast:</b> "+slideAmount+" <i>AAA</i>";
-    }
-    imageHistogram( offscreenContext, slideAmount, document.getElementById('deltaSlider').value );
-}
-function updateDeltaSlider(slideDeltaAmount){
-    var sliderDiv = document.getElementById("sliderDeltaAmount");
-        sliderDiv.innerHTML = "<b>ΔE*:</b> "+slideDeltaAmount;
-        imageHistogram( offscreenContext, document.getElementById('contrastSlider').value, slideDeltaAmount, document.getElementById('deltaSliderMax').value);
-}
-function updateDeltaSliderMax(slideDeltaAmountMax){
-    var sliderDiv = document.getElementById("sliderDeltaAmountMax");
-        sliderDiv.innerHTML = "<b>max ΔE*:</b> "+slideDeltaAmountMax;
-        imageHistogram( offscreenContext, document.getElementById('contrastSlider').value, document.getElementById('deltaSlider').value, slideDeltaAmountMax);
-}
-var cSlider = document.getElementById("contrastSlider");
-var dSlider = document.getElementById("deltaSlider");
-var dSliderMax = document.getElementById("deltaSliderMax");
-cSlider.oninput = updateContrastValue;
-dSlider.oninput = updateDeltaValue;
-dSliderMax.oninput = updateDeltaValueMax;
-function updateContrastValue(){
-    var val = document.getElementById("contrastSlider").value;
-    var sliderDiv = document.getElementById("sliderAmount");
-    sliderDiv.innerHTML = "<b>Contrast:</b> "+val;
-}
-function updateDeltaValue(){
-    var val = document.getElementById("deltaSlider").value;
-    var sliderDiv = document.getElementById("sliderDeltaAmount");
-    sliderDiv.innerHTML = "<b>ΔE*:</b> "+val;
-}
-function updateDeltaValueMax(){
-    var val = document.getElementById("deltaSliderMax").value;
-    var sliderDiv = document.getElementById("sliderDeltaAmountMax");
-    sliderDiv.innerHTML = "<b>max ΔE*:</b> "+val;
-}
 function download() {
 var download = document.getElementById("download");
 var image = document.getElementById("oCanvas").toDataURL("image/png")
@@ -519,7 +526,7 @@ function trimToDeltaDiffFG(arr, delta, deltaMax){
         //checks if color is within delta limit, background and main foreground colour
         if( (ciede2000(tmpLab, mainFgLab) > delta) && (ciede2000(tmpLab, bgLab) < deltaMax) && (ciede2000(tmpLab, bgLab) > delta)){
             //arbitrary limit to filter out less frequent colours
-            if( arr[i].v/mainFgAmount > 0.003){
+            // if( arr[i].v/mainFgAmount > 0.003){
                 
                
                 for(j = 0; j < tmp.length; j++){
@@ -531,7 +538,7 @@ function trimToDeltaDiffFG(arr, delta, deltaMax){
                     }
                 }
                 tmp.push(arr[i]);    
-            }
+            // }
             
         }
     }
@@ -802,16 +809,16 @@ function ColorPicker(element,r,g,b) {
         canvas.width = diameter,
         this.canvas = canvas;
 
-        this.renderColorMap(r,g,b);
+        this.renderColorMap();
 
         element.appendChild(canvas);
 
         
     };
 
-    this.renderColorMap = function(r,g,b) {
+    this.renderColorMap = function() {
 
-        var hsv = rgbToHsv(r, g, b);
+       
         var canvas = this.canvas;
         var ctx = canvas.getContext('2d');
 
@@ -823,142 +830,119 @@ function ColorPicker(element,r,g,b) {
         
         var cx = cy = radius;
        
-        var thickness = 0.35;
+        var thickness = 1;
         var x = canvas.width / 2;
         var y = canvas.height / 2;
-        var img = new Image();
-        img.src = "gradient.png";
-        ctx.drawImage(img,0,0,);
-        // ctx.fillStyle = 'rgb('+r+', '+g+', '+b+')';
-        // ctx.beginPath();
-        // ctx.arc(x,y, 50, 0, 2 * Math.PI);
-        // ctx.fill();
-        
-        // for(var angle=0; angle<360; angle+=1){
-        //     var startAngle = (angle-2)*Math.PI/180;
-        //     var endAngle = angle * Math.PI/180;
+       
+       var gradient;
+        for(var angle=0; angle<360; angle+=1){
+            var startAngle = (angle-2)*Math.PI/180;
+            var endAngle = angle * Math.PI/180;
+            var x2 = x + radius * Math.cos(endAngle);
+            var y2 = y + radius * Math.sin(endAngle);
+            gradient = ctx.createLinearGradient(x, y, x2, y2);
+            gradient.addColorStop(0, 'hsl('+angle+', 100%, 100%)');
+            gradient.addColorStop(0.1, 'hsl('+angle+', 100%, 90%)');
+            gradient.addColorStop(0.2, 'hsl('+angle+', 100%, 80%)');
+            gradient.addColorStop(0.3, 'hsl('+angle+', 100%, 70%)');
+            gradient.addColorStop(0.4, 'hsl('+angle+', 100%, 60%)');
+            gradient.addColorStop(0.5, 'hsl('+angle+', 100%, 50%)');
+            gradient.addColorStop(0.6, 'hsl('+angle+', 100%, 40%)');
+            gradient.addColorStop(0.7, 'hsl('+angle+', 100%, 30%)');
+            gradient.addColorStop(0.8, 'hsl('+angle+', 100%, 20%)');
+            // gradient.addColorStop(0.9, 'hsl('+angle+', 100%, 10%)');
+            gradient.addColorStop(1, 'hsl('+angle+', 100%, 5%)');
+           
 
-        //     ctx.beginPath();
-        //     ctx.arc(x, y, (1/5)*radius, startAngle, endAngle, false);
-        //     ctx.lineWidth = thickness*radius;
-        //     ctx.strokeStyle = 'hsl('+hsv[0]*360+', 50%, '+(angle/360)*100+'%)';
-        //     ctx.stroke();
-
-        //     ctx.beginPath();
-        //     ctx.arc(x, y, (1-thickness/2)*radius, startAngle, endAngle, false);
-        //     ctx.lineWidth = thickness*radius;
-        //     ctx.strokeStyle = 'hsl('+angle+', 100%, 50%)';
-        //     ctx.stroke();
+            ctx.beginPath();
+            ctx.arc(x, y, (1-thickness/2)*radius, startAngle, endAngle, false);
+            ctx.lineWidth = radius;
+            ctx.strokeStyle = gradient;
+            ctx.stroke();
 
             
 
-        // }
-
-                // draw saturation gradient
-        
-        
-        // render the rainbow box here ----------
-    };
-
-    this.renderMouseCircle = function(x, y, m) {
-        var canvas = this.canvas;
-        var ctx = canvas.getContext('2d');
-        var or = 75;
-
-        
-        ctx.beginPath();
-        ctx.arc(x,y, 4, 0, 2 * Math.PI);
-        ctx.strokeStyle = 'rgb(0,0,0)';
-        ctx.lineWidth = 1;
-        ctx.stroke();
-      
-    };
-
-    
-    function rgbToHsv(r, g, b){
-        r = r/255, g = g/255, b = b/255;
-        var max = Math.max(r, g, b), min = Math.min(r, g, b);
-        var h, s, v = max;
-
-        var d = max - min;
-        s = max == 0 ? 0 : d / max;
-
-        if(max == min){
-            h = 0; // achromatic
-        }else{
-            switch(max){
-                case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-                case g: h = (b - r) / d + 2; break;
-                case b: h = (r - g) / d + 4; break;
-            }
-            h /= 6;
         }
 
-        return [h, s, v];
-    }
-    this.plotBg = function(r, g, b, m){
-
-        var canvas = this.canvas;
-        var ctx = canvas.getContext('2d');
-        var hsv = rgbToHsv(r, g, b);
-        var r1 = r; var g1=g; var b1=b;
-        var h = hsv[2];
-        var s = 0.45;
-        
-        var theta =  h * 2 * Math.PI ;
-        var maxRadius = canvas.width / 2;
-        var r = s * maxRadius;
-        var x = r * Math.cos(theta) + maxRadius,
-            y = r * Math.sin(theta) + maxRadius;
-
-        this.renderBg(x, y, m, r1,g1,b1); 
-    }
-
-    this.renderBg = function(x, y, m, r1,g1,b1) {
-      
-        var canvas = this.canvas;
-        var ctx = canvas.getContext('2d');
-        var or = 75;
-        var ir=Math.abs(255-r1);
-        var ig=Math.abs(255-g1);
-        var ib=Math.abs(255-b1);
-        // console.log('rgb('+r1+', '+ig+', '+ib+')');
-        ctx.beginPath();
-        ctx.moveTo(or,or);
-        ctx.lineTo(x,y);
-        ctx.lineWidth = 5;
-        ctx.strokeStyle = 'rgb('+ir+', '+ig+', '+ib+')';
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.moveTo(or,or);
-        ctx.lineTo(x,y);
-        ctx.lineWidth = 4;
-        ctx.strokeStyle = 'rgb('+r+', '+g+', '+b+')';
-        ctx.stroke();
-
-        ctx.fillStyle = 'rgb('+r+', '+g+', '+b+')';
-        ctx.beginPath();
-        ctx.arc(x,y, 5, 0, 2 * Math.PI);
-        ctx.fill();
-   
     };
 
-    this.plotRgb = function(r, g, b, m) {
+
+    
+   
+    this.plotBg = function(r, g, b){
+
         var canvas = this.canvas;
         var ctx = canvas.getContext('2d');
-        var hsv = rgbToHsv(r, g, b);
+        var hsl = rgbToHsl(r, g, b);
+
+        var r1 = r; var g1=g; var b1=b;
+        var l = hsl[2];
        
-        var h = hsv[0];
-        var s = 0.8;
-        
-        var theta = h * 2* Math.PI;
+
+        // ctx.beginPath();
+        // ctx.arc(100,100, 100*(1-l), 0, 2 * Math.PI);
+        // ctx.strokeStyle = 'rgb(0,0,0)';
+        // ctx.lineWidth = 3;
+        // ctx.stroke();
+
+        // ctx.beginPath();
+        // ctx.arc(100,100, 100*(1-l), 0, 2 * Math.PI);
+        // ctx.strokeStyle = 'rgb(255,255,255)';
+        // ctx.lineWidth = 2;
+        // ctx.stroke();
+    }
+
+   
+    this.plotRgb = function(red, g, b, v) {
+        var canvas = this.canvas;
+        var ctx = canvas.getContext('2d');
+        var hsl = rgbToHsl(red, g, b);
+       
+        var theta = hsl[0] * 2* Math.PI;
         var maxRadius = canvas.width / 2;
-        var r = s * maxRadius;
+        var r = (1 - hsl[2]) * maxRadius;
         var x = r * Math.cos(theta) + maxRadius,
             y = r * Math.sin(theta) + maxRadius;
+        
+        ctx.fillStyle = 'rgb('+red+','+g+','+b+')';
+        ctx.beginPath();
+        ctx.arc(x,y, 6, 0, 2 * Math.PI);
+        ctx.strokeStyle = 'rgb(0,0,0)';
+        
+        ctx.lineWidth = 1;
+        ctx.closePath();
+        ctx.fill();
+        ctx.font = '10pt Calibri';
+        ctx.textAlign = 'center';
 
-        this.renderMouseCircle(x, y, m);        
+        ctx.fillStyle ="rgb(0,0,0)";  
+        ctx.fillText(v, x, y+16);
+        ctx.stroke();
+       
+        if(adjusted[red+'.'+g+'.'+b] != undefined){
+            hsl = rgbToHsl(adjusted[red+'.'+g+'.'+b].r, adjusted[red+'.'+g+'.'+b].g, adjusted[red+'.'+g+'.'+b].b);
+            theta = hsl[0] * 2* Math.PI;
+            r = (1 - hsl[2]) * maxRadius;
+            var x2 = r * Math.cos(theta) + maxRadius,
+            y2 = r * Math.sin(theta) + maxRadius;
+
+            var arrowX = x + 0.75; 
+            var arrowTopY = y - 0.707*(0.25);  
+            var arrowBottomY = y + 0.707*(0.25); 
+
+            ctx.fillStyle = 'rgb('+adjusted[red+'.'+g+'.'+b].r+', '+adjusted[red+'.'+g+'.'+b].g+', '+adjusted[red+'.'+g+'.'+b].b+')';
+            ctx.beginPath();
+            ctx.arc(x2,y2, 6, 0, 2 * Math.PI);
+            ctx.strokeStyle = 'rgb(0,0,0)';
+            ctx.lineWidth = 1;
+            ctx.closePath();
+            ctx.moveTo(x, y); 
+            ctx.lineTo(x2, y2); 
+            ctx.fill();
+            ctx.stroke();
+            // this.drawArrow(ctx,x,y,x2,y2);
+               // console.log(adjusted[red+'.'+g+'.'+b].r); 
+        }       
     }
 
     this.init();
@@ -989,28 +973,7 @@ function rgbToHsl(r, g, b) {
 
   return [ h, s, l ];
 }
-function getHue(r, g, b) {
-  r /= 255, g /= 255, b /= 255;
 
-  var max = Math.max(r, g, b), min = Math.min(r, g, b);
-  var h = (max + min) / 2;
-
-  if (max == min) {
-    h = 0; // achromatic
-  } else {
-    var d = max - min;
-
-    switch (max) {
-      case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-      case g: h = (b - r) / d + 2; break;
-      case b: h = (r - g) / d + 4; break;
-    }
-
-    h /= 6;
-  }
-
-  return h;
-}
 /**
  * Converts an HSL color value to RGB. Conversion formula
  * adapted from http://en.wikipedia.org/wiki/HSL_color_space.
@@ -1022,31 +985,7 @@ function getHue(r, g, b) {
  * @param   Number  l       The lightness
  * @return  Array           The RGB representation
  */
-function hslToRgb(h, s, l) {
-  var r, g, b;
 
-  if (s == 0) {
-    r = g = b = l; // achromatic
-  } else {
-    function hue2rgb(p, q, t) {
-      if (t < 0) t += 1;
-      if (t > 1) t -= 1;
-      if (t < 1/6) return p + (q - p) * 6 * t;
-      if (t < 1/2) return q;
-      if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
-      return p;
-    }
-
-    var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-    var p = 2 * l - q;
-
-    r = hue2rgb(p, q, h + 1/3);
-    g = hue2rgb(p, q, h);
-    b = hue2rgb(p, q, h - 1/3);
-  }
-
-  return [ r * 255, g * 255, b * 255 ];
-}
 
 
 var sqrt = Math.sqrt;
@@ -1175,3 +1114,166 @@ function a_hp_f(C1, C2, h1p, h2p) { //(14)
   else                                                throw(new Error());
 }
 
+var deltaMinMaxSlider = document.getElementById('deltaSliderCombine');
+
+noUiSlider.create(deltaMinMaxSlider, {
+    start: [15,80],
+    connect: true,
+    tooltips: true,
+    range: {
+        'min': 0,
+        'max': 100
+    }
+});
+
+deltaMinMaxSlider.noUiSlider.on('end', function (values, handle) {
+
+    var value = values[handle];
+    dMinSlider = Math.round( this.get()[0] );
+    dMaxSlider = Math.round( this.get()[1] );
+    document.getElementById("deltaControl").innerHTML = "ΔE* range: ["+dMinSlider+", "+dMaxSlider+"]<img src='q.png' height='14' width='14'>";
+    if(imageObj){
+        imageHistogram( offscreenContext, cSlider, dMinSlider, dMaxSlider);
+    } 
+    
+});
+document.getElementById("contrastControl").innerHTML = "Contrast: "+cSlider+"<img src='q.png' height='14' width='14'>"; 
+document.getElementById("deltaControl").innerHTML = "ΔE* range: ["+dMinSlider+", "+dMaxSlider+"]<img src='q.png' height='14' width='14'>"; 
+
+var contrastSlider = document.getElementById('cSlider');
+
+noUiSlider.create(contrastSlider, {
+    start: [3],
+    connect: true,
+    range: {
+        'min': 0,
+        'max': 20
+    }
+});
+
+contrastSlider.noUiSlider.on('end', function (values, handle) {
+
+    var value = values[handle];
+    cSlider = this.get()[0];
+    document.getElementById("contrastControl").innerHTML = "Contrast: "+cSlider+"<img src='q.png' height='14' width='14'>";
+    if(imageObj){
+        imageHistogram( offscreenContext, cSlider, dMinSlider, dMaxSlider);
+    }
+});
+
+var x, i, j, selElmnt, a, b, c;
+/* Look for any elements with the class "custom-select": */
+x = document.getElementsByClassName("custom-select");
+for (i = 0; i < x.length; i++) {
+  selElmnt = x[i].getElementsByTagName("select")[0];
+  /* For each element, create a new DIV that will act as the selected item: */
+  a = document.createElement("DIV");
+  a.setAttribute("class", "select-selected");
+  a.innerHTML = selElmnt.options[selElmnt.selectedIndex].innerHTML;
+  x[i].appendChild(a);
+  /* For each element, create a new DIV that will contain the option list: */
+  b = document.createElement("DIV");
+  b.setAttribute("class", "select-items select-hide");
+  for (j = 1; j < selElmnt.length; j++) {
+    /* For each option in the original select element,
+    create a new DIV that will act as an option item: */
+    c = document.createElement("DIV");
+    c.innerHTML = selElmnt.options[j].innerHTML;
+    c.addEventListener("click", function(e) {
+        /* When an item is clicked, update the original select box,
+        and the selected item: */
+        var y, i, k, s, h;
+        s = this.parentNode.parentNode.getElementsByTagName("select")[0];
+        h = this.parentNode.previousSibling;
+        for (i = 0; i < s.length; i++) {
+          if (s.options[i].innerHTML == this.innerHTML) {
+            s.selectedIndex = i;
+            h.innerHTML = this.innerHTML;
+            y = this.parentNode.getElementsByClassName("same-as-selected");
+            for (k = 0; k < y.length; k++) {
+              y[k].removeAttribute("class");
+            }
+            this.setAttribute("class", "same-as-selected");
+            break;
+          }
+        }
+        h.click();
+    });
+    b.appendChild(c);
+  }
+  x[i].appendChild(b);
+  a.addEventListener("click", function(e) {
+    /* When the select box is clicked, close any other select boxes,
+    and open/close the current select box: */
+    e.stopPropagation();
+    closeAllSelect(this);
+    this.nextSibling.classList.toggle("select-hide");
+    this.classList.toggle("select-arrow-active");
+  });
+}
+
+function closeAllSelect(elmnt) {
+  /* A function that will close all select boxes in the document,
+  except the current select box: */
+  var x, y, i, arrNo = [];
+  x = document.getElementsByClassName("select-items");
+  y = document.getElementsByClassName("select-selected");
+  for (i = 0; i < y.length; i++) {
+    if (elmnt == y[i]) {
+      arrNo.push(i)
+    } else {
+      y[i].classList.remove("select-arrow-active");
+    }
+  }
+  for (i = 0; i < x.length; i++) {
+    if (arrNo.indexOf(i)) {
+      x[i].classList.add("select-hide");
+    }
+  }
+}
+
+/* If the user clicks anywhere outside the select box,
+then close all select boxes: */
+document.addEventListener("click", closeAllSelect);
+// instanciate new modal
+// var modal = new tingle.modal({
+//     footer: true,
+//     stickyFooter: false,
+//     closeMethods: ['overlay', 'button', 'escape'],
+//     closeLabel: "Close",
+//     cssClass: ['custom-class-1', 'custom-class-2'],
+//     onOpen: function() {
+//         console.log('modal open');
+//     },
+//     onClose: function() {
+//         console.log('modal closed');
+//     },
+//     beforeClose: function() {
+//         // here's goes some logic
+//         // e.g. save content before closing the modal
+//         return true; // close the modal
+//         return false; // nothing happens
+//     }
+// });
+
+// // set content
+// modal.setContent('<h1>here\'s some content</h1>');
+
+// // add a button
+// modal.addFooterBtn('Button label', 'tingle-btn tingle-btn--primary', function() {
+//     // here goes some logic
+//     modal.close();
+// });
+
+// // add another button
+// modal.addFooterBtn('Dangerous action !', 'tingle-btn tingle-btn--danger', function() {
+//     // here goes some logic
+//     modal.close();
+// });
+
+// // open modal
+// modal.open();
+
+// // close modal
+// modal.close();
+//             
