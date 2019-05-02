@@ -1166,7 +1166,7 @@ noUiSlider.create(contrastSlider, {
 contrastSlider.noUiSlider.on('end', function (values, handle) {
 
     var value = values[handle];
-    cSlider = this.get()[0];
+    cSlider = Math.floor(this.get());
     document.getElementById("contrastControl").innerHTML = "Contrast: "+cSlider+"<img class='help' src='q.png' height='14' width='14'>";
     if(imageObj){
         imageHistogram( offscreenContext, cSlider, dMinSlider, dMaxSlider);
@@ -1252,7 +1252,8 @@ var deltaModal = new tingle.modal({
     footer: true,
     stickyFooter: false,
     closeMethods: ['overlay', 'button', 'escape'],
-    closeLabel: "Close"
+    closeLabel: "Close",
+    cssClass: ['custom-class-1', 'custom-class-2']
 });
 
 // set content
