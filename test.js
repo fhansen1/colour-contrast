@@ -1311,6 +1311,7 @@ var analysingModal = new tingle.modal({
 var analysingContent = '<h1>Analysis target</h1>';
     analysingContent += '<img src="img/analysing.png">';
     analysingContent += '<p>By selecting a target for analysis WCAG2.0 badges will appear while hovering colours in the "Colour analysis" column if they meet the criteria.</p>';
+    analysingContent += '<img src="img/hover.png"/>';
     analysingContent += '<img src="img/analysing2.png"/>';
     analysingContent += '<p><a href="https://www.w3.org/TR/WCAG20/#visual-audio-contrast" target="_blank">More information</p>';
 analysingModal.setContent(analysingContent);
