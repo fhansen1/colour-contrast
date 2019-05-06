@@ -1308,7 +1308,7 @@ var analysingModal = new tingle.modal({
 });
 
 // set content
-var analysingContent = '<h1>Contrast adjustments</h1>';
+var analysingContent = '<h1>Analysis target</h1>';
     analysingContent += '<img src="img/analysing.png">';
     analysingContent += '<p>By selecting a target for analysis WCAG2.0 badges will appear while hovering colours in the "Colour analysis" column if they meet the criteria.</p>';
     analysingContent += '<img src="img/analysing2.png"/>';
