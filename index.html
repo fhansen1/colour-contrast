@@ -28,11 +28,12 @@
 		<div id="controls">
 				<p>I am analyzing <img class='help' src="q.png" height="14" width="14"></p>
 				<div class="custom-select" style="width:90%; margin: 0 auto;">
-				  <select>
-				    <option value="0">Small text</option>
-				    <option value="1">Headline</option>
-				    <option value="2">Logo</option>
-				    <option value="3">Other</option>
+				  <select id="typeSelect">
+				  	<option value="0">Please select</option>
+				    <option value="1">Normal text</option>
+				    <option value="2">Large text</option>
+				    <option value="3">Logo</option>
+				    <option value="4">Other</option>
 				  </select>
 				</div>
 				<p id="contrastControl">​</p>
@@ -43,9 +44,10 @@
 				
 				<p>Simulate visual impairment <img class='help' src="q.png" height="14" width="14"></p>
 				<!-- <button type="button">Toggle</button> -->
-				<button class="tingle-btn tingle-btn--primary">Toggle</button>
+				<button id="impairToggle" class="tingle-btn tingle-btn--primary" onclick="toggleImpairment()">Off</button>
 		</div>
 		<div class="analyzer">
+			<div id="diploma-st-aa"></div>
 			<div id="details" style="display:none">
 				<div class="info"></div>
 			</div>
@@ -63,13 +65,17 @@
   			<div id="corrections">
 				<div id="histogram"></div><!-- <p style="height:1px;"></p> -->
 				<div id="suggestion"></div>
+				<div id="message"></div>
 			</div>
 			<div id="toast"></div>
 		</div>
 		
 		
 	</div>
-
+	</div>
+<div class="footer">
+	<p><a href="https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html" target="_blank">Read more about the WCAG2.0 guidelines</a></p>
+</div>
 
 </body>
 <script src="noUiSlider/nouislider.min.js" ></script>
@@ -80,21 +86,69 @@
 <!-- <script src="convert.js"></script>
 <script src="diff.js"></script> -->
 <style>
+#controls, .analyzer, #data{
+	-webkit-box-shadow: 0px 10px 14px 0px rgba(0,0,0,0.75);
+-moz-box-shadow: 0px 10px 14px 0px rgba(0,0,0,0.75);
+box-shadow: 0px 10px 14px 0px rgba(0,0,0,0.75);
+}
+.footer{
+	height:80px;
+	background: #3c3c3c;
+	border-top: 1px solid #fff;
+	width: 100%;
+	position: fixed;
+	bottom: 0;
+	left:0;
+}
+.footer a{
+	margin-left: 5%;
+	color: #fff;
+}
+#details.aa:after{
+	content: url(img/aa.png); 
+}
+#details.aaa:after{
+	content: url(img/aaa.png); 
+}
+#details.aa:after, #details.aaa:after{
+
+	position: absolute;
+	width: 156px;
+	height:66px;
+	z-index:100;
+	bottom:-70px;
+	right:0px;
+}
+#diploma-st-aa{
+	position: absolute;
+	width: 156px;
+	height:66px;
+	background: url(img/aa.png); 
+	display: none;
+	z-index:100;
+	top:40px;
+	left:40px;
+}
 .help:hover{
 	cursor: pointer;
 }
 .tingle-btn--primary {
 	background: #30bbd4;
 }
+#controls .tingle-btn--primary {
+	margin-left: 5%;
+}
 .header1{
 	
-    background: grey;
-    height: 100px;
-    border: 1px solid black;
+    background: #3c3c3c;
+    height: 70px;
+    border-bottom: 1px solid #fff;
+    padding-top: 30px;
     color: #ffffff;
 }
 .header1 h1{
 	margin-left: 5%;
+	margin-top: 0;
 }
 body{
 	background: #b5b5b5;
@@ -120,7 +174,7 @@ background: linear-gradient(to right, rgba(46,186,213,1) 1%,rgba(255,253,174,1) 
 filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#2ebad5', endColorstr='#fffdae',GradientType=1 ); /* IE6-9 */
 }
 #deltaSliderCombine .noUi-connect {
-	background:#66676780;
+	background:#66676757;
 }
 #cSlider{
 	/* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#000000+0,000000+100&0+0,1+100 */
@@ -148,7 +202,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00000000', e
 	position: absolute;
 	top:0px;
 	left:0;
-	
+	border-bottom: 1px solid #000000;
 }
 #details .info{
 	width:40%;
@@ -158,6 +212,8 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00000000', e
 	top:0;
 	right:0;
 	background: #fff;
+
+	border-left: 1px solid #000000;
 }
 #details .readThis{
 	
@@ -213,7 +269,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00000000', e
 #data{
 	display: inline-block;
 	float:left;
-	margin-left: 5%;
+	margin-bottom: 100px;
     padding: 5px;
     background: gray;
     color: #fff;
@@ -225,7 +281,6 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00000000', e
 #data p.header{
 	text-align: center;
     font-size: 20px;
-    font-weight: bold;
 }
 #data p{
 	text-align: center;
@@ -258,6 +313,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00000000', e
 	width: 550px;
 	float: left;
 	border: 1px solid #4c4c4c;
+	margin-right: 5%;
 }
 #oCanvas{
 	background: transparent;
@@ -299,7 +355,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00000000', e
 #corrections{
 	width:100%;
 	margin-left: 6px;
-	height:20px;
+	height:40px;
 	margin-top: -20px;
 }
 #histogram{
@@ -431,7 +487,7 @@ button, ::-webkit-file-upload-button {
   left: 0;
   right: 0;
   z-index: 99;
-  height: 350px;
+  height: 370px;
 }
 
 /* Hide the items when the select box is closed: */

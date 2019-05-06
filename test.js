@@ -22,6 +22,7 @@ var startY;
 var lumB;
 var dMaxSlider = 80, dMinSlider = 15, cSlider = 3;
 var imageObj;
+var impairment = false;
 var iBg = {r:0, g:0, b:0};
 var rect = {
     x: oWidth/3,
@@ -34,7 +35,18 @@ oCanvas.onmousedown = myDown;
 oCanvas.onmouseup = myUp;
 oCanvas.onmousemove = myMove;
 var pick = new ColorPicker(document.querySelector('.color-space'));
-
+function toggleImpairment(){
+    if(impairment){
+        impairment = false;
+        document.getElementById("impairToggle").innerHTML = "Off";
+    }else{
+        impairment = true;
+        document.getElementById("impairToggle").innerHTML = "On";
+    }
+    if(imageObj){
+        imageHistogram( offscreenContext, cSlider, dMinSlider, dMaxSlider);
+    }
+}
 // redraw the scene
 function draw() {
     oCtx.clearRect(0, 0, oWidth, oHeight);
@@ -45,6 +57,7 @@ function draw() {
     oCtx.strokeRect(rect.x, rect.y, rect.width, rect.height);
     oCtx.closePath();
     oCtx.fill();
+
 }
 // handle mousedown events
 function myDown(e) {
@@ -207,7 +220,7 @@ function fadeOpacity() {
 }
 //main method for now
 function imageHistogram(canvasImg, zC, zD, zDmax){
-    
+    document.getElementById('diploma-st-aa').style.display = "none";
     histogram = []; topDetectedColors = []; adjusted=[];
    
     
@@ -225,7 +238,6 @@ function imageHistogram(canvasImg, zC, zD, zDmax){
         var green = imgData.data[i+1];
         var blue = imgData.data[i+2];
         var alpha = imgData.data[i+3];  
-        
         
         //Helper array to make final array indexed
         if( tmpKeys.indexOf(red+"."+green+"."+blue) == -1) {
@@ -262,7 +274,7 @@ function imageHistogram(canvasImg, zC, zD, zDmax){
     //keeping top 5 foreground colors
     // topDetectedColors = topDistinctColors(topDetectedColors,6);
     topDetectedColors = trimToDeltaDiffFG(topDetectedColors, zD, zDmax);
-    console.log(topDetectedColors);
+
     iBg.r = Math.abs(255-topDetectedColors[0].r);
     iBg.b = Math.abs(255-topDetectedColors[0].b);
     iBg.g = Math.abs(255-topDetectedColors[0].g);
@@ -270,10 +282,10 @@ function imageHistogram(canvasImg, zC, zD, zDmax){
     for(i=0;i<topDetectedColors.length;i++){
     	colorsToChange[topDetectedColors[i].r+"."+topDetectedColors[i].g+"."+topDetectedColors[i].b] = topDetectedColors[i];
     }
-
+    
     changeConstrastImage(zC, zD, zDmax, imgData);
 }
-
+var colors=[];
 function changeConstrastImage(desiredContrast, delta, maxDelta, data){
     draw();
     start = new Date().valueOf();
@@ -311,42 +323,86 @@ function changeConstrastImage(desiredContrast, delta, maxDelta, data){
                 var lab = rgb2lab(r,g,b);
                 lumF = getBrightness(r,g,b);
                 contrast = getContrast(lumF,lumB);
-               
-                //comparing similarity with the top 10 colors
-                if( (ciede2000(lab,bgLab) > delta) && (ciede2000(lab,fgLab) < maxDelta) && (desiredContrast > contrast)) {
-                   
-                    
-                    var newRgb = adjustLightness(desiredContrast, lab, lumF, lumB, r, g, b) ;
-                    lumF = getBrightness(newRgb[0],newRgb[1],newRgb[2]);
-                    
-                    var d=[];                        
-                    d[0]   = Math.round(newRgb[0]);
-                    d[1]   = Math.round(newRgb[1]);
-                    d[2]   = Math.round(newRgb[2]);
-                    d[3]   = a;
-                    
-                    imgData.data[i]   = d[0];
-                    imgData.data[i+1] = d[1];
-                    imgData.data[i+2] = d[2];
-                    imgData.data[i+3] = a;
-                    
-                    //Helper array to make final array indexed
-                    if( tmpKeys.indexOf(r+"."+g+"."+b) == -1) {
-                        tmpKeys.push(r+"."+g+"."+b);
-                    }
-                    index = tmpKeys.indexOf(r+"."+g+"."+b);
+                if(!impairment){
+                    //comparing similarity with the top 10 colors
+                    if( (ciede2000(lab,bgLab) > delta) && (ciede2000(lab,fgLab) < maxDelta) && (desiredContrast > contrast) ) {
+                       
+                        // if(!impairment){
+                            var newRgb = adjustLightness(desiredContrast, lab, lumF, lumB, r, g, b) ;
+                        // }else{
+                        //     desiredContrast = 1;
+                        //     var newRgb = impairmentLightness(desiredContrast, lab, lumF, lumB, r, g, b) ;
+                        // }
+                        
+                        lumF = getBrightness(newRgb[0],newRgb[1],newRgb[2]);
+                        
+                        var d=[];                        
+                        d[0]   = Math.round(newRgb[0]);
+                        d[1]   = Math.round(newRgb[1]);
+                        d[2]   = Math.round(newRgb[2]);
+                        d[3]   = a;
+                        
+                        imgData.data[i]   = d[0];
+                        imgData.data[i+1] = d[1];
+                        imgData.data[i+2] = d[2];
+                        imgData.data[i+3] = a;
+                        
+                        //Helper array to make final array indexed
+                        if( tmpKeys.indexOf(r+"."+g+"."+b) == -1) {
+                            tmpKeys.push(r+"."+g+"."+b);
+                        }
+                        index = tmpKeys.indexOf(r+"."+g+"."+b);
 
-                    //Inserting values if new color
-                    if( !adjusted[ r+"."+g+"."+b ] ) {
-                        adjusted[ r+"."+g+"."+b ] = {
-                            v: 1, r : d[0], g : d[1], b: d[2], x: 0, y: 0, c: Math.round(getContrast(lumF,lumB)*10) / 10
-                        };
+                        //Inserting values if new color
+                        if( !adjusted[ r+"."+g+"."+b ] ) {
+                            adjusted[ r+"."+g+"."+b ] = {
+                                v: 1, r : d[0], g : d[1], b: d[2], x: 0, y: 0, c: Math.round(getContrast(lumF,lumB)*10) / 10
+                            };
+                        }
+                        //Already exists. Incrementing occurences value 
+                        else{
+                            adjusted[ r+"."+g+"."+b ].v = adjusted[ r+"."+g+"."+b ].v + 1; 
+                        }
+                        
                     }
-                    //Already exists. Incrementing occurences value 
-                    else{
-                        adjusted[ r+"."+g+"."+b ].v = adjusted[ r+"."+g+"."+b ].v + 1; 
+                }else if(impairment){
+                    if( (ciede2000(lab,bgLab) > delta) && (ciede2000(lab,fgLab) < maxDelta)  ) {  
+
+                        desiredContrast = cSlider - 1.5;
+                        if(desiredContrast < 1){
+                            desiredContrast = 1;
+                        } 
+                        var newRgb = impairmentLightness(desiredContrast, lab, lumF, lumB, r, g, b) ;
+                        lumF = getBrightness(newRgb[0],newRgb[1],newRgb[2]);
+                        
+                        var d=[];                        
+                        d[0]   = Math.round(newRgb[0]);
+                        d[1]   = Math.round(newRgb[1]);
+                        d[2]   = Math.round(newRgb[2]);
+                        d[3]   = a;
+                        
+                        imgData.data[i]   = d[0];
+                        imgData.data[i+1] = d[1];
+                        imgData.data[i+2] = d[2];
+                        imgData.data[i+3] = a;
+                        
+                        //Helper array to make final array indexed
+                        if( tmpKeys.indexOf(r+"."+g+"."+b) == -1) {
+                            tmpKeys.push(r+"."+g+"."+b);
+                        }
+                        index = tmpKeys.indexOf(r+"."+g+"."+b);
+
+                        //Inserting values if new color
+                        if( !adjusted[ r+"."+g+"."+b ] ) {
+                            adjusted[ r+"."+g+"."+b ] = {
+                                v: 1, r : d[0], g : d[1], b: d[2], x: 0, y: 0, c: Math.round(getContrast(lumF,lumB)*10) / 10
+                            };
+                        }
+                        //Already exists. Incrementing occurences value 
+                        else{
+                            adjusted[ r+"."+g+"."+b ].v = adjusted[ r+"."+g+"."+b ].v + 1; 
+                        }
                     }
-                    
                 }
         }
         
@@ -354,18 +410,15 @@ function changeConstrastImage(desiredContrast, delta, maxDelta, data){
    
     oCtx.putImageData(imgData,rect.x,rect.y);
     adjusted = adjusted.sort(function(a, b) { return b.v - a.v;});
-    console.log("**adjusted");
-    console.log(adjusted);
+
     var div, oldC="", detectedColours=""; var oldColor; document.getElementById("suggestion").innerHTML = ""; 
     var html = "";
-    // html += "<p>Suggested foreground colors</p>";
-    // detectedColours += "<p>Detected foreground colors</p>";
     
     var bg = "rgb("+topDetectedColors[0].r+","+topDetectedColors[0].g+","+topDetectedColors[0].b+")";
-    var htmlcontrast; var colors=[];
+    var htmlcontrast; 
 
     document.getElementById("cs").innerHTML = '';
-
+    document.getElementById('message').innerHTML = "";
     pick = new ColorPicker(document.querySelector('.color-space'));
     var h = 50;
     
@@ -402,8 +455,10 @@ function changeConstrastImage(desiredContrast, delta, maxDelta, data){
             // div += "<div style='background-color: rgb("+topDetectedColors[i].r+","+topDetectedColors[i].g+","+topDetectedColors[i].b+");border:3px solid "+bg+";color:"+color+";' onclick='copyRGB(this)'>"+i+"</div>";
         }
     }
-
-    
+    if( html === ""){
+        document.getElementById('message').innerHTML = "<p>Contrast requirement is met or no colours within ΔE* range</p>";
+    }
+   
     document.getElementById('topColours').innerHTML = detectedColours;
     document.getElementById('histogram').innerHTML = oldC;
     document.getElementById('suggestion').innerHTML = html;
@@ -412,6 +467,7 @@ function changeConstrastImage(desiredContrast, delta, maxDelta, data){
     console.log("bench: "+(end-start) );
     
 }
+
 function copyRGB(element) {
     
     var rgbToCopy = getComputedStyle(element).getPropertyValue("background-color");
@@ -446,13 +502,33 @@ function showDetails(element,i,a){
         }
         
         var c = getContrast(lum,lumB);
+        c = c.toFixed(2);
         var v = topDetectedColors[i].v;
         if(i > 1){
             v = ( v / topDetectedColors[1].v ) * 100;
         }else{
             v = 100;
         }
-        document.getElementById('details').innerHTML += "<div class='info'><p> Colour: "+rgb+"</p><p>Brightness: "+lum.toFixed(2)+"</p><p>Contrast: "+c.toFixed(2)+"</p><p> ΔE*: "+delta+"</p><p>Instances: "+topDetectedColors[i].v+"</p><p>%: "+v.toFixed(2)+"%</p></div>";
+        var e = document.getElementById("typeSelect").value;
+        var element = document.getElementById("details");
+        var cssClass="";
+        if(e == 1){
+            if((c >= 4.5) && (c < 7) ){
+                 element.classList.add("aa");
+            }else if(c >= 7){
+                element.classList.add("aaa");
+            }
+        }else if(e == 2){
+            if((c >= 3) && (c < 4.5) ){
+                 element.classList.add("aa");
+            }else if(c >= 4.5){
+                element.classList.add("aaa");
+            }
+        }
+        if(c < cSlider){
+            c = c + " (!)";
+        }
+        document.getElementById('details').innerHTML += "<div class='info'><p> Colour: "+rgb+"</p><p>Brightness: "+lum.toFixed(2)+"</p><p>Contrast: "+c+"</p><p> ΔE*: "+delta+"</p><p>Instances: "+topDetectedColors[i].v+"</p><p>%: "+v.toFixed(2)+"%</p></div>";
         document.getElementById('details').innerHTML += "<div class='readThis' style='"+bg+";'><p style='font-size:8px;color:"+rgb+"'>Can you read this?</p><p style='color:"+rgb+"'>Can you read this?</p><p style='font-size:30px;color:"+rgb+"'>Can you read this?</p><p style='font-size:40px;color:"+rgb+"'>Can you read this?</p></div>";
     }else{
         document.getElementById('details').innerHTML = "<div class='info'><p><b>Calculated background colour:</b></p><p> Colour: "+rgb+"</p><p>Brightness: "+lumB.toFixed(2)+"</p><p>Instances: "+topDetectedColors[i].v+"</p></div>";
@@ -463,6 +539,7 @@ function hideDetails(element){
     document.getElementById('details').style.display = "none";
     document.getElementById('details').style.zIndex = "-1";
     document.getElementById('details').innerHTML = "";
+    document.getElementById('details').className = "";
 }
 
 function download() {
@@ -487,11 +564,7 @@ function topDistinctColors(arr,nr){
             arr[i].lab = tmpLab;
             tmp[c] = arr[i];
             c++;
-            // break;
         }
-        // for(j=0;j<tmp.length;j++){
-
-        // }
     }
     //Keeping top nr
     tmp = tmp.splice(0,nr);
@@ -571,31 +644,7 @@ function trimToDeltaDiffFG(arr, delta, deltaMax){
             
         }
     }
-    // for(i=0; i < test.length; i++){
-    //     if(i == 0){
-    //         delete tmp[test[i]];
-    //     }else if( (i > 0) && (test[i]-1 > 0) ){
-    //         delete tmp[test[i]-1];
-    //     }
-        
-    // }
-    console.log("test: "+test.length);
-//     tmp.sort(function (a, b) {
-//     var aSize = b.v;
-//     var bSize = a.v;
-//     var aLow = b.dE;
-//     var bLow = a.dE;
-//     // console.log(aLow + " | " + bLow);
 
-//     if(aSize/bSize < 0.7)
-//     {
-//         return (aLow < bLow) ? -1 : (aLow > bLow) ? 1 : 0;
-//     }
-//     else
-//     {
-//         return (aSize < bSize) ? -1 : 1;
-//     }
-// });
     return tmp;
 }
 
@@ -625,45 +674,9 @@ function getBrightness(r, g, b) {
     return a[0] * 0.2126 + a[1] * 0.7152 + a[2] * 0.0722;
 }
 
-function adjustL(c, hsl, flum, blum, r, g, b){
-    var contrast=0; var count=1;  var brightness;
-  
-    var rgb = [r,g,b];
-    var l = hsl[2];   
-	contrast = getContrast(flum,blum);
-    
-    while( l >= 0 ){
-        // l equals in
-        rgb = hslToRgb(hsl[0], hsl[1], l );
-        brightness = getBrightness(rgb[0], rgb[1], rgb[2]);
-        contrast = getContrast(brightness,blum);
-        if( contrast >= c){
-            return rgb;
-        }
-        
-
-        l = l - (0.00005*count);  
-        count++;
-    }
-    l = hsl[2]; count = 0;
-	while( l <= 1 ){
-        // l equals in
-        rgb = hslToRgb(hsl[0], hsl[1], l );
-        brightness = getBrightness(rgb[0], rgb[1], rgb[2]);
-        contrast = getContrast(brightness,blum);
-        if( contrast >= c){
-            return rgb;
-        }
-        // contrast = getContrast(brightness,blum);
-
-        l = l + (0.00005*count);
-        count++;
-    }
-    return rgb;
-}
 
 function adjustLightness(c, lab, flum, blum, r, g, b){
-    var contrast=0; var count=1;  var brightness;
+    var contrast=0; var count=1;  var brightness, b1, b2;
   
     var rgb = [r,g,b];
     var lab = rgb2lab(r,g,b);
@@ -678,10 +691,9 @@ function adjustLightness(c, lab, flum, blum, r, g, b){
 
         if( contrast >= c){
             return rgb;
-            // console.log(lab[0]+" "+l);
         }
         
-
+        b1 = brightness;
         l = l - (0.5*count);  
         count++;
     }
@@ -694,12 +706,47 @@ function adjustLightness(c, lab, flum, blum, r, g, b){
         if( contrast >= c){
             return rgb;
         }
-        // contrast = getContrast(brightness,blum);
-
+        
+        b2 = brightness;
         l = l + (0.5*count);
         count++;
     }
-    return [0,0,0];
+    if( (brightness / blum) < 0 ){
+        return [255,255,255];
+    }else{
+        return [0,0,0];
+    }
+    
+}
+function impairmentLightness(c, lab, flum, blum, r, g, b){
+    var contrast=0; var count=1;  var brightness, b1, b2;
+  
+    var rgb = [r,g,b];
+    var lab = rgb2lab(r,g,b);
+    var l = lab[0];   
+    contrast = getContrast(flum,blum);
+
+    while( (l >= 0) && (l <=100) ){
+        // l equals in
+        rgb = lab2rgb( [l, lab[1], lab[2] ] );
+        brightness = getBrightness(rgb[0], rgb[1], rgb[2]);
+        contrast = getContrast(brightness,blum);
+
+        if( contrast + 0.2 >= c){
+            return rgb;
+        }
+        
+        l = l - (0.5*count);  
+        count++;
+        if( (flum / blum) < 0 ){
+            l = l - (0.5*count);
+        }else{
+            l = l + (0.5*count);
+        }
+    }
+    
+   
+    
 }
 function rgb2hsv(r,g,b) 
 {
@@ -1131,7 +1178,6 @@ var deltaMinMaxSlider = document.getElementById('deltaSliderCombine');
 noUiSlider.create(deltaMinMaxSlider, {
     start: [15,80],
     connect: true,
-    tooltips: true,
     range: {
         'min': 0,
         'max': 100
@@ -1146,8 +1192,13 @@ deltaMinMaxSlider.noUiSlider.on('end', function (values, handle) {
     document.getElementById("deltaControl").innerHTML = "ΔE* range: ["+dMinSlider+", "+dMaxSlider+"]<img class='help' src='q.png' height='14' width='14' onclick='deltaModal.open()'>";
     if(imageObj){
         imageHistogram( offscreenContext, cSlider, dMinSlider, dMaxSlider);
-    } 
-    
+    }  
+});
+deltaMinMaxSlider.noUiSlider.on('update', function (values, handle) {
+    var value = values[handle];
+    dMinSlider = Math.round( this.get()[0] );
+    dMaxSlider = Math.round( this.get()[1] );
+    document.getElementById("deltaControl").innerHTML = "ΔE* range: ["+dMinSlider+", "+dMaxSlider+"]<img class='help' src='q.png' height='14' width='14' onclick='deltaModal.open()'>";
 });
 document.getElementById("contrastControl").innerHTML = "Contrast: "+cSlider+"<img class='help' src='q.png' height='14' width='14'>"; 
 document.getElementById("deltaControl").innerHTML = "ΔE* range: ["+dMinSlider+", "+dMaxSlider+"]<img class='help' src='q.png' height='14' width='14' onclick='deltaModal.open()'>"; 
@@ -1158,19 +1209,21 @@ noUiSlider.create(contrastSlider, {
     start: [3],
     connect: true,
     range: {
-        'min': 0,
+        'min': 1,
         'max': 20
     }
 });
 
 contrastSlider.noUiSlider.on('end', function (values, handle) {
-
-    var value = values[handle];
-    cSlider = Math.floor(this.get());
+    cSlider = Math.round( this.get() * 10 ) / 10;
     document.getElementById("contrastControl").innerHTML = "Contrast: "+cSlider+"<img class='help' src='q.png' height='14' width='14'>";
     if(imageObj){
         imageHistogram( offscreenContext, cSlider, dMinSlider, dMaxSlider);
     }
+});
+contrastSlider.noUiSlider.on('update', function (values, handle) {
+    cSlider = Math.round( this.get() * 10 ) / 10;
+    document.getElementById("contrastControl").innerHTML = "Contrast: "+cSlider+"<img class='help' src='q.png' height='14' width='14'>";
 });
 
 var x, i, j, selElmnt, a, b, c;
@@ -1266,4 +1319,26 @@ deltaModal.addFooterBtn('OK', 'tingle-btn tingle-btn--primary', function() {
 });
 
 
-            
+/* Mobile check */
+var mobModal = new tingle.modal({
+    footer: true,
+    stickyFooter: false,
+    closeMethods: ['overlay', 'button', 'escape'],
+    closeLabel: "Close",
+    cssClass: ['custom-class-1', 'custom-class-2']
+});
+
+var info = "<p>For the intended experience - use a computer.</p>";
+mobModal.setContent('<h1>Mobile browser detected</h1>' + info);
+mobModal.addFooterBtn('OK', 'tingle-btn tingle-btn--primary', function() {
+mobModal.close();
+
+});
+window.mobileAndTabletcheck = function() {
+  var check = false;
+  (function(a){if(/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino|android|ipad|playbook|silk/i.test(a)||/1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substr(0,4))) check = true;})(navigator.userAgent||navigator.vendor||window.opera);
+  return check;
+};
+if(mobileAndTabletcheck()){
+    mobModal.open();
+}
