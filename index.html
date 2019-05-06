@@ -7,7 +7,7 @@
 </head>
 <body>
 	<div class="header1">
-	<h1>Contrast demo</h1>	
+	<h1>Colour contrast visualizer</h1>	
 	</div>
 	<div class="row">
 		
@@ -26,7 +26,7 @@
 		</div>	
 		</div>
 		<div id="controls">
-				<p>I am analyzing <img class='help' src="q.png" height="14" width="14"></p>
+				<p>I am analysing <img class='help' src="q.png" height="14" width="14" onclick="analysingModal.open()"></p>
 				<div class="custom-select" style="width:90%; margin: 0 auto;">
 				  <select id="typeSelect">
 				  	<option value="0">Please select</option>
@@ -59,7 +59,7 @@
 			</div>
 		</div>	
 		<div id="data">
-			<p class="header">Color analysis <img class='help' src="q.png" height="14" width="14"></p>
+			<p class="header">Colour analysis <img class='help' src="q.png" height="14" width="14" onclick="analysisModal.open()"></p>
 			<div id="cs" class="color-space"></div>
   			<div id="topColours"><p style="margin-top:40px;">Corrections will appear here</p></div>
   			<div id="corrections">
@@ -86,6 +86,9 @@
 <!-- <script src="convert.js"></script>
 <script src="diff.js"></script> -->
 <style>
+html{
+	font-family: Calibri,Candara,Segoe,Segoe UI,Optima,Arial,sans-serif; 
+}
 #controls, .analyzer, #data{
 	-webkit-box-shadow: 0px 10px 14px 0px rgba(0,0,0,0.75);
 -moz-box-shadow: 0px 10px 14px 0px rgba(0,0,0,0.75);

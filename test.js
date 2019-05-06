@@ -1200,7 +1200,7 @@ deltaMinMaxSlider.noUiSlider.on('update', function (values, handle) {
     dMaxSlider = Math.round( this.get()[1] );
     document.getElementById("deltaControl").innerHTML = "ΔE* range: ["+dMinSlider+", "+dMaxSlider+"]<img class='help' src='q.png' height='14' width='14' onclick='deltaModal.open()'>";
 });
-document.getElementById("contrastControl").innerHTML = "Contrast: "+cSlider+"<img class='help' src='q.png' height='14' width='14'>"; 
+document.getElementById("contrastControl").innerHTML = "Contrast: "+cSlider+"<img class='help' src='q.png' height='14' width='14' onclick='contrastModal.open()'>"; 
 document.getElementById("deltaControl").innerHTML = "ΔE* range: ["+dMinSlider+", "+dMaxSlider+"]<img class='help' src='q.png' height='14' width='14' onclick='deltaModal.open()'>"; 
 
 var contrastSlider = document.getElementById('cSlider');
@@ -1216,14 +1216,14 @@ noUiSlider.create(contrastSlider, {
 
 contrastSlider.noUiSlider.on('end', function (values, handle) {
     cSlider = Math.round( this.get() * 10 ) / 10;
-    document.getElementById("contrastControl").innerHTML = "Contrast: "+cSlider+"<img class='help' src='q.png' height='14' width='14'>";
+    document.getElementById("contrastControl").innerHTML = "Contrast: "+cSlider+"<img class='help' src='q.png' height='14' width='14' onclick='contrastModal.open()'>";
     if(imageObj){
         imageHistogram( offscreenContext, cSlider, dMinSlider, dMaxSlider);
     }
 });
 contrastSlider.noUiSlider.on('update', function (values, handle) {
     cSlider = Math.round( this.get() * 10 ) / 10;
-    document.getElementById("contrastControl").innerHTML = "Contrast: "+cSlider+"<img class='help' src='q.png' height='14' width='14'>";
+    document.getElementById("contrastControl").innerHTML = "Contrast: "+cSlider+"<img class='help' src='q.png' height='14' width='14' onclick='contrastModal.open()'>";
 });
 
 var x, i, j, selElmnt, a, b, c;
@@ -1299,7 +1299,28 @@ function closeAllSelect(elmnt) {
 
 /* If the user clicks anywhere outside the select box,
 then close all select boxes: */
-// document.addEventListener("click", closeAllSelect);
+var analysingModal = new tingle.modal({
+    footer: true,
+    stickyFooter: false,
+    closeMethods: ['overlay', 'button', 'escape'],
+    closeLabel: "Close",
+    cssClass: ['custom-class-1', 'custom-class-2']
+});
+
+// set content
+var analysingContent = '<h1>Contrast adjustments</h1>';
+    analysingContent += '<img src="img/analysing.png">';
+    analysingContent += '<p>By selecting a target for analysis WCAG2.0 badges will appear while hovering colours in the "Colour analysis" column if they meet the criteria.</p>';
+    analysingContent += '<img src="img/analysing2.png"/>';
+    analysingContent += '<p><a href="https://www.w3.org/TR/WCAG20/#visual-audio-contrast" target="_blank">More information</p>';
+analysingModal.setContent(analysingContent);
+
+// add a button
+analysingModal.addFooterBtn('OK', 'tingle-btn tingle-btn--primary', function() {
+    analysingModal.close();
+});
+
+
 // instanciate new deltaModal
 var deltaModal = new tingle.modal({
     footer: true,
@@ -1310,12 +1331,57 @@ var deltaModal = new tingle.modal({
 });
 
 // set content
-deltaModal.setContent('<h1>This is how the delta works</h1>');
+var deltaContent = '<h1>ΔE* range</h1>';
+    deltaContent += '<img src="img/delta.png">';
+    deltaContent += '<p>The ΔE* is the perceptual difference between the background and the foreground colour. The bigger the ΔE* the easier it is for humans to distinguish different colour. Adjust the range to pinpoint the colours you would like to analyze. Adjusting the minimum value will usually suffice.</p>';
+    deltaContent += '<p><a href="http://www.colorwiki.com/wiki/Delta_E:_The_Color_Difference" target="_blank">More information</p>';
+deltaModal.setContent(deltaContent);
 
 // add a button
 deltaModal.addFooterBtn('OK', 'tingle-btn tingle-btn--primary', function() {
-    // here goes some logic
     deltaModal.close();
+});
+
+var contrastModal = new tingle.modal({
+    footer: true,
+    stickyFooter: false,
+    closeMethods: ['overlay', 'button', 'escape'],
+    closeLabel: "Close",
+    cssClass: ['custom-class-1', 'custom-class-2']
+});
+
+// set content
+var contrastContent = '<h1>Contrast adjustments</h1>';
+    contrastContent += '<img src="img/contrast.png">';
+    contrastContent += '<p>Contrast is the brightness ratio between two colours. Increasing the slider will increase the brightness ratio by making the foreground either darker or brighter.</p>';
+    contrastContent += '<p>Contrast is calculated according to <a href="https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html" target="_blank">WCAG2.0</a> standards.</p>';
+contrastModal.setContent(contrastContent);
+
+// add a button
+contrastModal.addFooterBtn('OK', 'tingle-btn tingle-btn--primary', function() {
+    contrastModal.close();
+});
+
+var analysisModal = new tingle.modal({
+    footer: true,
+    stickyFooter: false,
+    closeMethods: ['overlay', 'button', 'escape'],
+    closeLabel: "Close",
+    cssClass: ['custom-class-1', 'custom-class-2']
+});
+
+// set content
+var analysisModalContent = '<h1>Colour Analysis</h1>';
+    analysisModalContent += '<img src="img/analysis-wheel.png">';
+    analysisModalContent += '<p>The colour wheel plots colours according to its hue and lightness. The lightness goes from zero at the outer edges to its maximum value in the center. The saturation of the colours is ignored. Black arrows indicate a lightness adjustment inward or outward.</p>';
+    analysisModalContent += '<img src="img/histogram-corrections.png">';
+    analysisModalContent += '<p>The histogram shows the order of the colours based on occurences in the analyzed image. While the order is true - the scale is not. Lastly, in the left column, the old colours which need correction are listed. To the right are the suggested, corrected colours.</p>';
+    analysisModalContent += '<p><b>Hover any of the colours for more information. Clicking any of them will copy its RGB value to the clipboard.</b></p>'
+analysisModal.setContent(analysisModalContent);
+    analysisModalContent = null;
+// add a button
+analysisModal.addFooterBtn('OK', 'tingle-btn tingle-btn--primary', function() {
+    analysisModal.close();
 });
 
 
