@@ -1411,6 +1411,7 @@ var deltaModal = new tingle.modal({
 var deltaContent = '<h1>ΔE* range</h1>';
     deltaContent += '<img src="img/delta.png">';
     deltaContent += '<p>The ΔE* is the perceptual difference between the background and the foreground colour. The bigger the ΔE* the easier it is for humans to distinguish different colours. Adjust the range to pinpoint the colours you would like to analyze. Adjusting the minimum value will usually suffice.</p>';
+    deltaContent += '<p>The ΔE* in this application is the perceptual difference between the detected background and current foreground colours.';
     deltaContent += '<p><b>Note: Only colours within the ΔE* range will be considered.</b></p>';
     deltaContent += '<p><a href="http://www.colorwiki.com/wiki/Delta_E:_The_Color_Difference" target="_blank">More information</p>';
 deltaModal.setContent(deltaContent);
