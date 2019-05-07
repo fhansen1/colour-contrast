@@ -994,9 +994,9 @@ function ColorPicker(element,r,g,b) {
             var arrowBottomY = y + 0.707*(0.25); 
 
             if(!saturation){
-                
                 rgb = hslToRgb(hsl[0],0,hsl[2]);
-                console.log(rgb);
+            }else{
+                rgb = hslToRgb(hsl[0],hsl[1],hsl[2]);
             }
 
             ctx.fillStyle = 'rgb('+rgb[0]+', '+rgb[1]+', '+rgb[2]+')';
