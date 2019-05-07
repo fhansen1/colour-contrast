@@ -525,6 +525,13 @@ function showDetails(element,i,a){
                 element.classList.add("aaa");
             }
         }
+        else if(e == 3){
+            if((c >= 3) && (c < 4.5) ){
+                 element.classList.add("aa");
+            }else if(c >= 4.5){
+                element.classList.add("aaa");
+            }
+        }
         if(c < cSlider){
             c = c + " (!)";
         }
