@@ -22,7 +22,7 @@ var startY;
 var lumB;
 var dMaxSlider = 80, dMinSlider = 15, cSlider = 3;
 var imageObj;
-var impairment = false;
+var impairment = false; var saturation = true;
 var iBg = {r:0, g:0, b:0};
 var rect = {
     x: oWidth/3,
@@ -45,6 +45,22 @@ function toggleImpairment(){
     }
     if(imageObj){
         imageHistogram( offscreenContext, cSlider, dMinSlider, dMaxSlider);
+    }
+}
+function toggleSaturation(){
+    if(saturation){
+        saturation = false;
+        pick = new ColorPicker(document.querySelector('.color-space'));
+    }else{
+        saturation = true;
+        pick = new ColorPicker(document.querySelector('.color-space'));
+    }
+    for(i=1;i<topDetectedColors.length;i++){
+
+        if(i > 5){
+            break;
+        }
+        pick.plotRgb(topDetectedColors[i].r, topDetectedColors[i].g, topDetectedColors[i].b, i);
     }
 }
 // redraw the scene
@@ -417,12 +433,12 @@ function changeConstrastImage(desiredContrast, delta, maxDelta, data){
     var bg = "rgb("+topDetectedColors[0].r+","+topDetectedColors[0].g+","+topDetectedColors[0].b+")";
     var htmlcontrast; 
 
-    document.getElementById("cs").innerHTML = '';
+    
     document.getElementById('message').innerHTML = "";
     pick = new ColorPicker(document.querySelector('.color-space'));
     var h = 50;
     
-    pick.plotBg(topDetectedColors[0].r, topDetectedColors[0].g, topDetectedColors[0].b);  
+    // pick.plotBg(topDetectedColors[0].r, topDetectedColors[0].g, topDetectedColors[0].b);  
     detectedColours+="<div style='background-color: "+bg+"; height:50px;' onclick='copyRGB(this)' onmouseover='showDetails(this,0)' onmouseout='hideDetails(this)'>BG</div>";
     for(i=1;i<topDetectedColors.length;i++){
 
@@ -847,6 +863,8 @@ function deltaE(labA, labB){
 }
 
 function ColorPicker(element,r,g,b) {
+
+    document.getElementById("cs").innerHTML = '';
     this.element = element;
 
     this.init = function() {
@@ -873,7 +891,7 @@ function ColorPicker(element,r,g,b) {
         var radius = canvas.width / 2;
         var toRad = (2 * Math.PI) / 360;
         var step = 1 / radius;
-        
+        var sat;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
         var cx = cy = radius;
@@ -882,24 +900,29 @@ function ColorPicker(element,r,g,b) {
         var x = canvas.width / 2;
         var y = canvas.height / 2;
        
-       var gradient;
+        var gradient;
+        if(saturation){
+            sat = "100%";
+        }else{
+            sat = "0%";
+        }
         for(var angle=0; angle<360; angle+=1){
             var startAngle = (angle-2)*Math.PI/180;
             var endAngle = angle * Math.PI/180;
             var x2 = x + radius * Math.cos(endAngle);
             var y2 = y + radius * Math.sin(endAngle);
             gradient = ctx.createLinearGradient(x, y, x2, y2);
-            gradient.addColorStop(0, 'hsl('+angle+', 100%, 100%)');
-            gradient.addColorStop(0.1, 'hsl('+angle+', 100%, 90%)');
-            gradient.addColorStop(0.2, 'hsl('+angle+', 100%, 80%)');
-            gradient.addColorStop(0.3, 'hsl('+angle+', 100%, 70%)');
-            gradient.addColorStop(0.4, 'hsl('+angle+', 100%, 60%)');
-            gradient.addColorStop(0.5, 'hsl('+angle+', 100%, 50%)');
-            gradient.addColorStop(0.6, 'hsl('+angle+', 100%, 40%)');
-            gradient.addColorStop(0.7, 'hsl('+angle+', 100%, 30%)');
-            gradient.addColorStop(0.8, 'hsl('+angle+', 100%, 20%)');
+            gradient.addColorStop(0  , 'hsl('+angle+', '+sat+', 100%)');
+            gradient.addColorStop(0.1, 'hsl('+angle+', '+sat+', 90%)');
+            gradient.addColorStop(0.2, 'hsl('+angle+', '+sat+', 80%)');
+            gradient.addColorStop(0.3, 'hsl('+angle+', '+sat+', 70%)');
+            gradient.addColorStop(0.4, 'hsl('+angle+', '+sat+', 60%)');
+            gradient.addColorStop(0.5, 'hsl('+angle+', '+sat+', 50%)');
+            gradient.addColorStop(0.6, 'hsl('+angle+', '+sat+', 40%)');
+            gradient.addColorStop(0.7, 'hsl('+angle+', '+sat+', 30%)');
+            gradient.addColorStop(0.8, 'hsl('+angle+', '+sat+', 20%)');
             // gradient.addColorStop(0.9, 'hsl('+angle+', 100%, 10%)');
-            gradient.addColorStop(1, 'hsl('+angle+', 100%, 5%)');
+            gradient.addColorStop(1, 'hsl('+angle+', '+sat+', 5%)');
            
 
             ctx.beginPath();
@@ -907,9 +930,6 @@ function ColorPicker(element,r,g,b) {
             ctx.lineWidth = radius;
             ctx.strokeStyle = gradient;
             ctx.stroke();
-
-            
-
         }
 
     };
@@ -926,18 +946,6 @@ function ColorPicker(element,r,g,b) {
         var r1 = r; var g1=g; var b1=b;
         var l = hsl[2];
        
-
-        // ctx.beginPath();
-        // ctx.arc(100,100, 100*(1-l), 0, 2 * Math.PI);
-        // ctx.strokeStyle = 'rgb(0,0,0)';
-        // ctx.lineWidth = 3;
-        // ctx.stroke();
-
-        // ctx.beginPath();
-        // ctx.arc(100,100, 100*(1-l), 0, 2 * Math.PI);
-        // ctx.strokeStyle = 'rgb(255,255,255)';
-        // ctx.lineWidth = 2;
-        // ctx.stroke();
     }
 
    
@@ -945,14 +953,21 @@ function ColorPicker(element,r,g,b) {
         var canvas = this.canvas;
         var ctx = canvas.getContext('2d');
         var hsl = rgbToHsl(red, g, b);
-       
+        var rgb = [red,g,b];
+
         var theta = hsl[0] * 2* Math.PI;
         var maxRadius = canvas.width / 2;
         var r = (1 - hsl[2]) * maxRadius;
         var x = r * Math.cos(theta) + maxRadius,
             y = r * Math.sin(theta) + maxRadius;
+            
+        if(!saturation){
+            rgb = hslToRgb(hsl[0],0,hsl[2]);
+        }
         
-        ctx.fillStyle = 'rgb('+red+','+g+','+b+')';
+        
+        
+        ctx.fillStyle = 'rgb('+rgb[0]+','+rgb[1]+','+rgb[2]+')';
         ctx.beginPath();
         ctx.arc(x,y, 6, 0, 2 * Math.PI);
         ctx.strokeStyle = 'rgb(0,0,0)';
@@ -978,7 +993,13 @@ function ColorPicker(element,r,g,b) {
             var arrowTopY = y - 0.707*(0.25);  
             var arrowBottomY = y + 0.707*(0.25); 
 
-            ctx.fillStyle = 'rgb('+adjusted[red+'.'+g+'.'+b].r+', '+adjusted[red+'.'+g+'.'+b].g+', '+adjusted[red+'.'+g+'.'+b].b+')';
+            if(!saturation){
+                
+                rgb = hslToRgb(hsl[0],0,hsl[2]);
+                console.log(rgb);
+            }
+
+            ctx.fillStyle = 'rgb('+rgb[0]+', '+rgb[1]+', '+rgb[2]+')';
             ctx.beginPath();
             ctx.arc(x2,y2, 6, 0, 2 * Math.PI);
             ctx.strokeStyle = 'rgb(0,0,0)';
@@ -1008,7 +1029,8 @@ function ColorPicker(element,r,g,b) {
             ctx.restore();
             // this.drawArrow(ctx,x,y,x2,y2);
                // console.log(adjusted[red+'.'+g+'.'+b].r); 
-        }       
+        } 
+              
     }
 
     this.init();
@@ -1051,6 +1073,31 @@ function rgbToHsl(r, g, b) {
  * @param   Number  l       The lightness
  * @return  Array           The RGB representation
  */
+function hslToRgb(h, s, l) {
+  var r, g, b;
+
+  if (s == 0) {
+    r = g = b = l; // achromatic
+  } else {
+    function hue2rgb(p, q, t) {
+      if (t < 0) t += 1;
+      if (t > 1) t -= 1;
+      if (t < 1/6) return p + (q - p) * 6 * t;
+      if (t < 1/2) return q;
+      if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+      return p;
+    }
+
+    var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+    var p = 2 * l - q;
+
+    r = hue2rgb(p, q, h + 1/3);
+    g = hue2rgb(p, q, h);
+    b = hue2rgb(p, q, h - 1/3);
+  }
+
+  return [ r * 255, g * 255, b * 255 ];
+}
 
 
 
@@ -1381,7 +1428,9 @@ var analysisModal = new tingle.modal({
 // set content
 var analysisModalContent = '<h1>Colour Analysis</h1>';
     analysisModalContent += '<img src="img/analysis-wheel.png">';
+    analysisModalContent += '<img src="img/analysis-wheel-desat.png">';
     analysisModalContent += '<p>The colour wheel plots colours according to its hue and lightness. The lightness goes from zero at the outer edges to its maximum value in the center. The saturation of the colours is ignored. Black arrows indicate a lightness adjustment inward or outward.</p>';
+    analysisModalContent += '<p><b>Click the colour wheel to toggle hue/lightness and saturation/lightness.</b></p>';
     analysisModalContent += '<img src="img/histogram-corrections.png">';
     analysisModalContent += '<p>The histogram shows the order of the colours based on occurences in the analyzed image. While the order is true - the scale is not. Lastly, in the left column, the old colours which need correction are listed. To the right are the suggested, corrected colours.</p>';
     analysisModalContent += '<p><b>Hover any of the colours for more information. Clicking any of them will copy its RGB value to the clipboard.</b></p>'
