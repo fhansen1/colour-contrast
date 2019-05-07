@@ -1365,8 +1365,8 @@ var analysingModal = new tingle.modal({
 var analysingContent = '<h1>Analysis target</h1>';
     analysingContent += '<img src="img/analysing.png">';
     analysingContent += '<p>By selecting a target for analysis WCAG2.0 badges will appear while hovering colours in the "Colour analysis" column if they meet the criteria.</p>';
-    analysingContent += '<img src="img/hover.png"/>';
     analysingContent += '<img src="img/analysing2.png"/>';
+    analysingContent += '<img src="img/hover.png"/>';
     analysingContent += '<p><a href="https://www.w3.org/TR/WCAG20/#visual-audio-contrast" target="_blank">More information</p>';
 analysingModal.setContent(analysingContent);
 
@@ -1394,7 +1394,7 @@ var startContent = '<h1>Introduction</h1>';
 startModal.setContent(startContent);
 
 // add a button
-deltaModal.addFooterBtn('OK', 'tingle-btn tingle-btn--primary', function() {
+startModal.addFooterBtn('OK', 'tingle-btn tingle-btn--primary', function() {
     startModal.close();
 });
 
@@ -1411,6 +1411,7 @@ var deltaModal = new tingle.modal({
 var deltaContent = '<h1>ΔE* range</h1>';
     deltaContent += '<img src="img/delta.png">';
     deltaContent += '<p>The ΔE* is the perceptual difference between the background and the foreground colour. The bigger the ΔE* the easier it is for humans to distinguish different colours. Adjust the range to pinpoint the colours you would like to analyze. Adjusting the minimum value will usually suffice.</p>';
+    deltaContent += '<p><b>Note: Only colours within the ΔE* range will be considered.</b></p>';
     deltaContent += '<p><a href="http://www.colorwiki.com/wiki/Delta_E:_The_Color_Difference" target="_blank">More information</p>';
 deltaModal.setContent(deltaContent);
 
@@ -1451,8 +1452,8 @@ var analysisModal = new tingle.modal({
 var analysisModalContent = '<h1>Colour Analysis</h1>';
     analysisModalContent += '<img src="img/analysis-wheel.png">';
     analysisModalContent += '<img src="img/analysis-wheel-desat.png">';
-    analysisModalContent += '<p>The colour wheel plots colours according to its hue and lightness. The lightness goes from zero at the outer edges to its maximum value in the center. The saturation of the colours is ignored. Black arrows indicate a lightness adjustment inward or outward.</p>';
-    analysisModalContent += '<p><b>Click the colour wheel to toggle hue/lightness and saturation/lightness.</b></p>';
+    analysisModalContent += '<p>The colour circle plots colours according to its hue and lightness. The lightness goes from zero at the outer edges to its maximum value in the center. The saturation of the colours is ignored. Black arrows indicate a lightness adjustment inward or outward.</p>';
+    analysisModalContent += '<p><b>Click the colour circle to toggle between hue/lightness and saturation/lightness.</b></p>';
     analysisModalContent += '<img src="img/histogram-corrections.png">';
     analysisModalContent += '<p>The histogram shows the order of the colours based on occurences in the analyzed image. While the order is true - the scale is not. Lastly, in the left column, the old colours which need correction are listed. To the right are the suggested, corrected colours.</p>';
     analysisModalContent += '<p><b>Hover any of the colours for more information. Clicking any of them will copy its RGB value to the clipboard.</b></p>'
