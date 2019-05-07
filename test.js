@@ -247,8 +247,9 @@ function imageHistogram(canvasImg, zC, zD, zDmax){
     
 
     imgData = ctx.getImageData(rect.x, rect.y, width/3, height/3);
+    
     //loops through the centre of the image
-    for (var i = 0; i < imgData.data.length; i+=16) {
+    for (var i = 0; i < imgData.data.length; i+=4) {
             
         var red = imgData.data[i];
         var green = imgData.data[i+1];
@@ -263,8 +264,9 @@ function imageHistogram(canvasImg, zC, zD, zDmax){
 
         //Inserting values if new color
         if( !histogram[ index ] ) {
+
             histogram[ index ] = {
-                v: 1, r : red, b : blue, g: green, x: (i / 4) % (width/3), y: Math.floor((i / 4) / (width/3))
+                v: 1, r : red, b : blue, g: green
             };
                
         }
@@ -437,7 +439,7 @@ function changeConstrastImage(desiredContrast, delta, maxDelta, data){
     document.getElementById('message').innerHTML = "";
     pick = new ColorPicker(document.querySelector('.color-space'));
     var h = 50;
-    
+    var e = 0;
     // pick.plotBg(topDetectedColors[0].r, topDetectedColors[0].g, topDetectedColors[0].b);  
     detectedColours+="<div style='background-color: "+bg+"; height:50px;' onclick='copyRGB(this)' onmouseover='showDetails(this,0)' onmouseout='hideDetails(this)'>BG</div>";
     for(i=1;i<topDetectedColors.length;i++){
@@ -461,7 +463,7 @@ function changeConstrastImage(desiredContrast, delta, maxDelta, data){
             
             div = "<div class ='changed' style='background-color: rgb("+adjusted[c].r+","+adjusted[c].g+","+adjusted[c].b+");' onclick='copyRGB(this)' onmouseover='showDetails(this,"+i+",a)' onmouseout='hideDetails(this)'>"+i+"</div>";
             html += div;
-        
+            e++;
         }
         else{
             var color = "rgb("+Math.abs(topDetectedColors[i].r-255) + "," + Math.abs(topDetectedColors[i].g-255) + "," + Math.abs(topDetectedColors[i].b)-255+")";
@@ -478,7 +480,8 @@ function changeConstrastImage(desiredContrast, delta, maxDelta, data){
     document.getElementById('topColours').innerHTML = detectedColours;
     document.getElementById('histogram').innerHTML = oldC;
     document.getElementById('suggestion').innerHTML = html;
-    
+   
+    document.getElementById('corrections').style.height = e*38+"px";
     var end = new Date().valueOf();
     console.log("bench: "+(end-start) );
     
@@ -952,6 +955,7 @@ function ColorPicker(element,r,g,b) {
     this.plotRgb = function(red, g, b, v) {
         var canvas = this.canvas;
         var ctx = canvas.getContext('2d');
+       
         var hsl = rgbToHsl(red, g, b);
         var rgb = [red,g,b];
 
@@ -960,12 +964,10 @@ function ColorPicker(element,r,g,b) {
         var r = (1 - hsl[2]) * maxRadius;
         var x = r * Math.cos(theta) + maxRadius,
             y = r * Math.sin(theta) + maxRadius;
-            
+       
         if(!saturation){
             rgb = hslToRgb(hsl[0],0,hsl[2]);
         }
-        
-        
         
         ctx.fillStyle = 'rgb('+rgb[0]+','+rgb[1]+','+rgb[2]+')';
         ctx.beginPath();
