@@ -230,13 +230,11 @@ function fadeOpacity() {
       myopacity += .075;
      setTimeout(function(){fadeOpacity()},100);
    }
-   // document.getElementById('data').style.opacity = myopacity;
-   // document.getElementById('dl').style.opacity = myopacity;
-   // document.getElementById('desc').style.opacity = myopacity;
+   document.getElementById('dl').style.opacity = myopacity;
 }
 //main method for now
 function imageHistogram(canvasImg, zC, zD, zDmax){
-    document.getElementById('diploma-st-aa').style.display = "none";
+    
     histogram = []; topDetectedColors = []; adjusted=[];
    
     
@@ -1377,6 +1375,28 @@ analysingModal.addFooterBtn('OK', 'tingle-btn tingle-btn--primary', function() {
     analysingModal.close();
 });
 
+// instanciate new deltaModal
+var startModal = new tingle.modal({
+    footer: true,
+    stickyFooter: false,
+    closeMethods: ['overlay', 'button', 'escape'],
+    closeLabel: "Close",
+    cssClass: ['custom-class-1', 'custom-class-2']
+});
+
+// set content
+var startContent = '<h1>Introduction</h1>';
+    startContent += '<img src="img/text.png">';
+    startContent += '<p>In order for designs to be accessible for most people multiple factors must be taken into account. An important factor in accessibility is <b>contrast</b>.</p>';
+    startContent += '<p>This tool attempts to make contrast easy by visualising suggested changes in real-time and making the new colour values readily available.</p>';
+    startContent += '<p><b>Click the <img class="help" src="q.png" height="14" width="14">-marks for guidance.</b></p>';
+    startContent += '<p><a href="https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html" target="_blank">Read more about the WCAG2.0 guidelines</p>';
+startModal.setContent(startContent);
+
+// add a button
+deltaModal.addFooterBtn('OK', 'tingle-btn tingle-btn--primary', function() {
+    startModal.close();
+});
 
 // instanciate new deltaModal
 var deltaModal = new tingle.modal({

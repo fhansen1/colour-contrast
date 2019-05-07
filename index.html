@@ -20,11 +20,7 @@
 				<label>Image File:</label><br/>
 		<input type="file" id="imageLoader" name="imageLoader"/>
 			</div>
-			<div id="dl">
-			<a id="download" download="contrast.png">
-			<button type="button" onClick="download()">Download</button>
-			</a>
-		</div>	
+			<div><b onclick="startModal.open()">Introduction <img class='help' src="q.png" height="14" width="14"></b></div>
 		</div>
 		<div id="controls">
 				<p>Analysis target <img class='help' src="q.png" height="14" width="14" onclick="analysingModal.open()"></p>
@@ -46,7 +42,9 @@
 				<button id="impairToggle" class="tingle-btn tingle-btn--primary" onclick="alert('Not yet implemented')">Off</button>
 		</div>
 		<div class="analyzer">
-			<div id="diploma-st-aa"></div>
+			<div id="dl">
+				<a id="download" download="contrast.png"><button class="tingle-btn tingle-btn--primary" type="button" onClick="download()">Download</button></a>
+			</div>	
 			<div id="details" style="display:none">
 				<div class="info"></div>
 			</div>
