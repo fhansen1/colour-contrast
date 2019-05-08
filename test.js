@@ -8,7 +8,6 @@ var histogram = [];
 var topDetectedColors = [];
 var adjusted = [];
 var start;
-var colorsToChange=[];
 var alreadyIn=[];
 var offScreenCanvas, offscreenContext;
 var oCanvas = document.getElementById("oCanvas");
@@ -23,7 +22,7 @@ var lumB;
 var dMaxSlider = 80, dMinSlider = 15, cSlider = 3;
 var imageObj;
 var impairment = false; var saturation = true;
-var iBg = {r:0, g:0, b:0};
+
 var rect = {
     x: oWidth/3,
     y: oHeight/3,
@@ -69,7 +68,6 @@ function draw() {
     oCtx.beginPath();
     oCtx.lineWidth = 3;
     oCtx.setLineDash([10, 20]);
-    oCtx.strokeStyle = 'rgb('+iBg.r+','+iBg.g+','+iBg.b+')';
     oCtx.strokeRect(rect.x, rect.y, rect.width, rect.height);
     oCtx.closePath();
     oCtx.fill();
@@ -239,32 +237,29 @@ function imageHistogram(canvasImg, zC, zD, zDmax){
    
     
     var tmpKeys=[]; 
-    var red, green, blue, index;
+    var r, g, b, a, index;
     width = canvas.width; height = canvas.height;
-    var count=0;
-    
-
     imgData = ctx.getImageData(rect.x, rect.y, width/3, height/3);
     
     //loops through the centre of the image
     for (var i = 0; i < imgData.data.length; i+=4) {
             
-        var red = imgData.data[i];
-        var green = imgData.data[i+1];
-        var blue = imgData.data[i+2];
-        var alpha = imgData.data[i+3];  
+        r = imgData.data[i];
+        g = imgData.data[i+1];
+        b = imgData.data[i+2];
+        a = imgData.data[i+3];  
         
         //Helper array to make final array indexed
-        if( tmpKeys.indexOf(red+"."+green+"."+blue) == -1) {
-            tmpKeys.push(red+"."+green+"."+blue);
+        if( tmpKeys.indexOf(r+"."+g+"."+b) == -1) {
+            tmpKeys.push(r+"."+g+"."+b);
         }
-        index = tmpKeys.indexOf(red+"."+green+"."+blue);
+        index = tmpKeys.indexOf(r+"."+g+"."+b);
 
         //Inserting values if new color
         if( !histogram[ index ] ) {
 
             histogram[ index ] = {
-                v: 1, r : red, b : blue, g: green
+                v: 1, r : r, b : b, g: g
             };
                
         }
@@ -290,14 +285,7 @@ function imageHistogram(canvasImg, zC, zD, zDmax){
     //keeping top 5 foreground colors
     // topDetectedColors = topDistinctColors(topDetectedColors,6);
     topDetectedColors = trimToDeltaDiffFG(topDetectedColors, zD, zDmax);
-
-    iBg.r = Math.abs(255-topDetectedColors[0].r);
-    iBg.b = Math.abs(255-topDetectedColors[0].b);
-    iBg.g = Math.abs(255-topDetectedColors[0].g);
     
-    for(i=0;i<topDetectedColors.length;i++){
-    	colorsToChange[topDetectedColors[i].r+"."+topDetectedColors[i].g+"."+topDetectedColors[i].b] = topDetectedColors[i];
-    }
     
     changeConstrastImage(zC, zD, zDmax, imgData);
 }
@@ -598,7 +586,7 @@ function trimToDeltaDiff(arr){
     var tmp=[];
     tmp[0]=histogram[0];
     for(i=1;i<arr.length;i++){
-        if(arr[i].dE > 3.5){
+        if(arr[i].dE > 3){
             tmp.push(histogram[i]);
         }
     }
@@ -620,8 +608,6 @@ function trimToDeltaDiffFG(arr, delta, deltaMax){
 
     }  
    
-    
-    //l
     mainLoop:
     for(i = 2; i < arr.length; i++){
        
@@ -629,43 +615,14 @@ function trimToDeltaDiffFG(arr, delta, deltaMax){
 
         //checks if color is within delta limit, background and main foreground colour
         if( (ciede2000(tmpLab, mainFgLab) > delta) && (ciede2000(tmpLab, bgLab) < deltaMax) && (ciede2000(tmpLab, bgLab) > delta)){
-            //arbitrary limit to filter out less frequent colours
-            // if( arr[i].v/mainFgAmount > 0.003){
-                
-               
+    
                 for(j = 0; j < tmp.length; j++){
                     
-                    //
                     if( ciede2000(tmpLab, rgb2lab(tmp[j].r, tmp[j].g, tmp[j].b)) < delta){
                         continue mainLoop;
-                        
                     }
                 }
                 tmp.push(arr[i]);    
-            // }
-            
-        }
-    }
-    var test = []; var tmp2 = [];
-    outerLoop:
-    for(i = 0; i < tmp.length; i++){
-        tmpLab = rgb2lab(tmp[i].r, tmp[i].g, tmp[i].b);
-        for(j = i+1; j+1 < tmp.length; j++){
-        
-
-                tmpLab2 = rgb2lab(tmp[j+1].r, tmp[j+1].g, tmp[j+1].b);
-                
-                // if(ciede2000(tmpLab, tmpLab2) < 10){
-                //     // console.log(tmpLab2);
-                //     test.push(j);
-                //     tmp = tmp.splice(0, j);
-                //     continue outerLoop;
-                //     // delete tmp[j];
-                //     // tmp = tmp.splice(i, j);
-                // }
-                
-            
-            
         }
     }
 
