@@ -14,7 +14,7 @@ deltaMinMaxSlider.noUiSlider.on('end', function (values, handle) {
     var value = values[handle];
     dMinSlider = Math.round( this.get()[0] );
     dMaxSlider = Math.round( this.get()[1] );
-    document.getElementById("deltaControl").innerHTML = "ΔE* range: ["+dMinSlider+", "+dMaxSlider+"]<img class='help' src='img/q.png' height='14' width='14' onclick='deltaModal.open()'>";
+    document.getElementById("deltaControl").innerHTML = "ΔE* range: ["+dMinSlider+", "+dMaxSlider+"]<img class='help' alt='Question mark' src='img/q.png' height='14' width='14' onclick='deltaModal.open()'>";
     if(imageObj){
         imageHistogram( offscreenContext, cSlider, dMinSlider, dMaxSlider);
     }  
@@ -23,10 +23,10 @@ deltaMinMaxSlider.noUiSlider.on('update', function (values, handle) {
     var value = values[handle];
     dMinSlider = Math.round( this.get()[0] );
     dMaxSlider = Math.round( this.get()[1] );
-    document.getElementById("deltaControl").innerHTML = "ΔE* range: ["+dMinSlider+", "+dMaxSlider+"]<img class='help' src='img/q.png' height='14' width='14' onclick='deltaModal.open()'>";
+    document.getElementById("deltaControl").innerHTML = "ΔE* range: ["+dMinSlider+", "+dMaxSlider+"]<img class='help' alt='Question mark' src='img/q.png' height='14' width='14' onclick='deltaModal.open()'>";
 });
-document.getElementById("contrastControl").innerHTML = "Contrast: "+cSlider+"<img class='help' src='img/q.png' height='14' width='14' onclick='contrastModal.open()'>"; 
-document.getElementById("deltaControl").innerHTML = "ΔE* range: ["+dMinSlider+", "+dMaxSlider+"]<img class='help' src='img/q.png' height='14' width='14' onclick='deltaModal.open()'>"; 
+document.getElementById("contrastControl").innerHTML = "Contrast: "+cSlider+"<img class='help' alt='Question mark' src='img/q.png' height='14' width='14' onclick='contrastModal.open()'>"; 
+document.getElementById("deltaControl").innerHTML = "ΔE* range: ["+dMinSlider+", "+dMaxSlider+"]<img class='help' alt='Question mark' src='img/q.png' height='14' width='14' onclick='deltaModal.open()'>"; 
 
 var contrastSlider = document.getElementById('cSlider');
 
@@ -41,14 +41,14 @@ noUiSlider.create(contrastSlider, {
 
 contrastSlider.noUiSlider.on('end', function (values, handle) {
     cSlider = Math.round( this.get() * 10 ) / 10;
-    document.getElementById("contrastControl").innerHTML = "Contrast: "+cSlider+"<img class='help' src='img/q.png' height='14' width='14' onclick='contrastModal.open()'>";
+    document.getElementById("contrastControl").innerHTML = "Contrast: "+cSlider+"<img class='help' alt='Question mark' src='img/q.png' height='14' width='14' onclick='contrastModal.open()'>";
     if(imageObj){
         imageHistogram( offscreenContext, cSlider, dMinSlider, dMaxSlider);
     }
 });
 contrastSlider.noUiSlider.on('update', function (values, handle) {
     cSlider = Math.round( this.get() * 10 ) / 10;
-    document.getElementById("contrastControl").innerHTML = "Contrast: "+cSlider+"<img class='help' src='img/q.png' height='14' width='14' onclick='contrastModal.open()'>";
+    document.getElementById("contrastControl").innerHTML = "Contrast: "+cSlider+"<img class='help' alt='Question mark' src='img/q.png' height='14' width='14' onclick='contrastModal.open()'>";
 });
 
 var x, i, j, selElmnt, a, b, c;
@@ -134,10 +134,10 @@ var analysingModal = new tingle.modal({
 
 // set content
 var analysingContent = '<h1>Analysis target</h1>';
-    analysingContent += '<img src="img/analysing.png">';
+    analysingContent += '<img src="img/analysing.png" alt="Select box example"/>';
     analysingContent += '<p>By selecting a target for analysis WCAG2.0 badges will appear while hovering colours in the "Colour analysis" column if they meet the criteria.</p>';
-    analysingContent += '<img src="img/analysing2.png"/>';
-    analysingContent += '<img src="img/hover.png"/>';
+    analysingContent += '<img src="img/analysing2.png" alt="Calculated colour information example" />';
+    analysingContent += '<img src="img/hover.png" alt="Pointer hovering calculated colour"/>';
     analysingContent += '<p><a href="https://www.w3.org/TR/WCAG20/#visual-audio-contrast" target="_blank">More information</p>';
 analysingModal.setContent(analysingContent);
 
@@ -157,7 +157,7 @@ var startModal = new tingle.modal({
 
 // set content
 var startContent = '<h1>Introduction</h1>';
-    startContent += '<img src="img/text.png">';
+    startContent += '<img src="img/text.png" alt="Examples of different sizes of text on different colours"/>';
     startContent += '<p>In order for designs to be accessible for most people multiple factors must be taken into account. An important factor in accessibility is <b>contrast</b>.</p>';
     startContent += '<p>This tool attempts to make contrast easy by visualising suggested changes in real-time and making the new colour values readily available.</p>';
     startContent += '<p><b>Click the <img class="help" src="img/q.png" height="14" width="14">-marks for guidance.</b></p>';
@@ -180,7 +180,7 @@ var deltaModal = new tingle.modal({
 
 // set content
 var deltaContent = '<h1>ΔE* range</h1>';
-    deltaContent += '<img src="img/delta.png">';
+    deltaContent += '<img src="img/delta.png" alt="Delta range slider example"/>';
     deltaContent += '<p>The ΔE* is the perceptual difference between the background and the foreground colour. The bigger the ΔE* the easier it is for humans to distinguish different colours. Adjust the range to pinpoint the colours you would like to analyze. Adjusting the minimum value will usually suffice.</p>';
     deltaContent += '<p>The ΔE* in this application is the perceptual difference between the detected background and current foreground colours.';
     deltaContent += '<p><b>Note: Only colours within the ΔE* range will be considered.</b></p>';
@@ -202,7 +202,7 @@ var contrastModal = new tingle.modal({
 
 // set content
 var contrastContent = '<h1>Contrast adjustments</h1>';
-    contrastContent += '<img src="img/contrast.png">';
+    contrastContent += '<img src="img/contrast.png" alt="Contrast slider example"/>';
     contrastContent += '<p>Contrast is the brightness ratio between two colours. Increasing the slider will increase the brightness ratio by making the foreground either darker or brighter.</p>';
     contrastContent += '<p>Contrast is calculated according to <a href="https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html" target="_blank">WCAG2.0</a> standards.</p>';
 contrastModal.setContent(contrastContent);
@@ -222,11 +222,11 @@ var analysisModal = new tingle.modal({
 
 // set content
 var analysisModalContent = '<h1>Colour Analysis</h1>';
-    analysisModalContent += '<img src="img/analysis-wheel.png">';
-    analysisModalContent += '<img src="img/analysis-wheel-desat.png">';
+    analysisModalContent += '<img src="img/analysis-wheel.png" alt="Colour circle with plotted, detected colours with hue"/>';
+    analysisModalContent += '<img src="img/analysis-wheel-desat.png" alt="Colour circle with plotted, detected colours with hue"/>';
     analysisModalContent += '<p>The colour circle plots colours according to its hue and lightness. The lightness goes from zero at the outer edges to its maximum value in the center. The saturation of the colours is ignored. Black arrows indicate a lightness adjustment inward or outward.</p>';
     analysisModalContent += '<p><b>Click the colour circle to toggle between hue/lightness and saturation/lightness.</b></p>';
-    analysisModalContent += '<img src="img/histogram-corrections.png">';
+    analysisModalContent += '<img src="img/histogram-corrections.png" alt="Histogram of detected colours. Colours with too little and their corrections is also shown."/>';
     analysisModalContent += '<p>The histogram shows the order of the colours based on occurences in the analyzed image. While the order is true - the scale is not. Lastly, in the left column, the old colours which need correction are listed. To the right are the suggested, corrected colours.</p>';
     analysisModalContent += '<p><b>Hover any of the colours for more information. Clicking any of them will copy its RGB value to the clipboard.</b></p>'
 analysisModal.setContent(analysisModalContent);
