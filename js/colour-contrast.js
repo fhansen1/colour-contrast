@@ -366,6 +366,8 @@ function changeConstrastImage(desiredContrast, delta, maxDelta, data){
     
     var end = new Date().valueOf();
     console.log("bench: "+(end-start) );
+    document.getElementById("toast").innerHTML = "<p>"+(end-start)+" ms</p>";
+    setTimeout("document.getElementById('toast').innerHTML = ''", 1300);
     
 }
 function drawAnalysis(){

@@ -249,11 +249,11 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00000000', e
 #design{
 	width: 550px;
 	height: 550px;
-	background-image: url('../Wedges-3s-200px.gif'); 
+	background-image: url('../img/logo.png'); 
 	background-position: center center;
 	background-repeat: no-repeat;
+	background-size: 25%; 
 	z-index: 7;
-	
 }
 #design p{
 	text-align: center;
@@ -318,7 +318,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00000000', e
     font-size: 20px;
 }
 #histogram div.changed:after{
-	content: url('../right-arrow.png');
+	content: url('../img/right-arrow.png');
 	position: absolute;
 	left: 95px;
     margin-top: 4px;

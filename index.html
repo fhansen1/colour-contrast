@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <link rel="stylesheet" href="css/style.css" />
-  <link rel="stylesheet" href="noUiSlider/nouislider.min.css" />
-  <link rel="stylesheet" href="tingle/tingle.min.css" />
+  <link rel="stylesheet" href="plugins/noUiSlider/nouislider.min.css" />
+  <link rel="stylesheet" href="plugins/tingle/tingle.min.css" />
 </head>
 <body>
 	<div class="header1">
-	<h1>Colour contrast visualizer</h1>	
+	<h1>Colour Contrast Visualizer</h1>	
 	</div>
 	<div class="row">
 		
@@ -20,10 +20,10 @@
 				<label>Image File:</label><br/>
 		<input type="file" id="imageLoader" name="imageLoader"/>
 			</div>
-			<div><b onclick="startModal.open()">Introduction <img class='help' src="q.png" height="14" width="14"></b></div>
+			<div><b onclick="startModal.open()">Introduction <img class='help' src="img/q.png" height="14" width="14"></b></div>
 		</div>
 		<div id="controls">
-				<p>Analysis target <img class='help' src="q.png" height="14" width="14" onclick="analysingModal.open()"></p>
+				<p>Analysis target <img class='help' src="img/q.png" height="14" width="14" onclick="analysingModal.open()"></p>
 				<div class="custom-select" style="width:90%; margin: 0 auto;">
 				  <select id="typeSelect">
 				  	<option value="0">Please select</option>
@@ -38,7 +38,7 @@
 	  			<p id="deltaControl">​</p>
 	  			<div id="deltaSliderCombine" type="text"></div>
 				
-				<p>Simulate visual impairment <img class='help' src="q.png" height="14" width="14"></p>
+				<p>Simulate visual impairment <img class='help' src="img/q.png" height="14" width="14"></p>
 				<button id="impairToggle" class="tingle-btn tingle-btn--primary" onclick="alert('Not yet implemented')">Off</button>
 		</div>
 		<div class="analyzer">
@@ -56,7 +56,7 @@
 			</div>
 		</div>	
 		<div id="data">
-			<p class="header">Colour analysis <img class='help' src="q.png" height="14" width="14" onclick="analysisModal.open()"></p>
+			<p class="header">Colour analysis <img class='help' src="img/q.png" height="14" width="14" onclick="analysisModal.open()"></p>
 			<div id="cs" onclick="toggleSaturation()" class="color-space"></div>
   			<div id="topColours"><p style="margin-top:40px;">Corrections will appear here</p></div>
   			<div id="corrections">
@@ -75,11 +75,14 @@
 </div>
 
 </body>
-<script src="noUiSlider/nouislider.min.js" ></script>
-<script src="tingle/tingle.min.js" ></script>
+<script src="plugins/noUiSlider/nouislider.min.js" ></script>
+<script src="plugins/tingle/tingle.min.js" ></script>
 <script src="js/colour-contrast.js"></script>
 <script src="js/extras.js"></script>
 <script src="js/colour-conversions.js"></script>
+<!-- <script src="js/colour-contrast.min.js"></script>
+<script src="js/extras.min.js"></script>
+<script src="js/colour-conversions.min.js"></script> -->
 <style>
 
 </style>

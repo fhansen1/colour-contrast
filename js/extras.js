@@ -14,7 +14,7 @@ deltaMinMaxSlider.noUiSlider.on('end', function (values, handle) {
     var value = values[handle];
     dMinSlider = Math.round( this.get()[0] );
     dMaxSlider = Math.round( this.get()[1] );
-    document.getElementById("deltaControl").innerHTML = "ΔE* range: ["+dMinSlider+", "+dMaxSlider+"]<img class='help' src='q.png' height='14' width='14' onclick='deltaModal.open()'>";
+    document.getElementById("deltaControl").innerHTML = "ΔE* range: ["+dMinSlider+", "+dMaxSlider+"]<img class='help' src='img/q.png' height='14' width='14' onclick='deltaModal.open()'>";
     if(imageObj){
         imageHistogram( offscreenContext, cSlider, dMinSlider, dMaxSlider);
     }  
@@ -23,10 +23,10 @@ deltaMinMaxSlider.noUiSlider.on('update', function (values, handle) {
     var value = values[handle];
     dMinSlider = Math.round( this.get()[0] );
     dMaxSlider = Math.round( this.get()[1] );
-    document.getElementById("deltaControl").innerHTML = "ΔE* range: ["+dMinSlider+", "+dMaxSlider+"]<img class='help' src='q.png' height='14' width='14' onclick='deltaModal.open()'>";
+    document.getElementById("deltaControl").innerHTML = "ΔE* range: ["+dMinSlider+", "+dMaxSlider+"]<img class='help' src='img/q.png' height='14' width='14' onclick='deltaModal.open()'>";
 });
-document.getElementById("contrastControl").innerHTML = "Contrast: "+cSlider+"<img class='help' src='q.png' height='14' width='14' onclick='contrastModal.open()'>"; 
-document.getElementById("deltaControl").innerHTML = "ΔE* range: ["+dMinSlider+", "+dMaxSlider+"]<img class='help' src='q.png' height='14' width='14' onclick='deltaModal.open()'>"; 
+document.getElementById("contrastControl").innerHTML = "Contrast: "+cSlider+"<img class='help' src='img/q.png' height='14' width='14' onclick='contrastModal.open()'>"; 
+document.getElementById("deltaControl").innerHTML = "ΔE* range: ["+dMinSlider+", "+dMaxSlider+"]<img class='help' src='img/q.png' height='14' width='14' onclick='deltaModal.open()'>"; 
 
 var contrastSlider = document.getElementById('cSlider');
 
@@ -41,14 +41,14 @@ noUiSlider.create(contrastSlider, {
 
 contrastSlider.noUiSlider.on('end', function (values, handle) {
     cSlider = Math.round( this.get() * 10 ) / 10;
-    document.getElementById("contrastControl").innerHTML = "Contrast: "+cSlider+"<img class='help' src='q.png' height='14' width='14' onclick='contrastModal.open()'>";
+    document.getElementById("contrastControl").innerHTML = "Contrast: "+cSlider+"<img class='help' src='img/q.png' height='14' width='14' onclick='contrastModal.open()'>";
     if(imageObj){
         imageHistogram( offscreenContext, cSlider, dMinSlider, dMaxSlider);
     }
 });
 contrastSlider.noUiSlider.on('update', function (values, handle) {
     cSlider = Math.round( this.get() * 10 ) / 10;
-    document.getElementById("contrastControl").innerHTML = "Contrast: "+cSlider+"<img class='help' src='q.png' height='14' width='14' onclick='contrastModal.open()'>";
+    document.getElementById("contrastControl").innerHTML = "Contrast: "+cSlider+"<img class='help' src='img/q.png' height='14' width='14' onclick='contrastModal.open()'>";
 });
 
 var x, i, j, selElmnt, a, b, c;
@@ -160,7 +160,7 @@ var startContent = '<h1>Introduction</h1>';
     startContent += '<img src="img/text.png">';
     startContent += '<p>In order for designs to be accessible for most people multiple factors must be taken into account. An important factor in accessibility is <b>contrast</b>.</p>';
     startContent += '<p>This tool attempts to make contrast easy by visualising suggested changes in real-time and making the new colour values readily available.</p>';
-    startContent += '<p><b>Click the <img class="help" src="q.png" height="14" width="14">-marks for guidance.</b></p>';
+    startContent += '<p><b>Click the <img class="help" src="img/q.png" height="14" width="14">-marks for guidance.</b></p>';
     startContent += '<p><a href="https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html" target="_blank">Read more about the WCAG2.0 guidelines</p>';
 startModal.setContent(startContent);
 
