@@ -281,7 +281,7 @@ function imageHistogram(canvasImg, zC, zD, zDmax){
     //sorting by number of occurences (v)
     histogram = histogram.sort(function(a, b) {return b.v - a.v;});
    
-    topDetectedColors = topColours2lab(histogram);
+    topDetectedColors = topColoursAddDelta(histogram);
     
     topDetectedColors = trimToDeltaDiff(topDetectedColors);
     
@@ -636,19 +636,17 @@ function impairmentLightness(c, lab, flum, blum, r, g, b){
         }
     }
     
-   
-    
 }
 
-function topColours2lab(top){
+function topColoursAddDelta(top){
     var bg = rgb2lab(top[0].r,top[0].g,top[0].b);
     for(i=1;i<top.length;i++){
         lab = rgb2lab(top[i].r,top[i].g,top[i].b);
         top[i].dE = ciede2000(bg, lab);
     }
     return top;
-
 }
+
 
 function ColorPicker(element,r,g,b) {
 
@@ -657,22 +655,18 @@ function ColorPicker(element,r,g,b) {
 
     this.init = function() {
         var diameter = 200;
-
         var canvas = document.createElement('canvas');
         canvas.height = diameter;
         canvas.width = diameter,
         this.canvas = canvas;
 
         this.renderColorMap();
-
         element.appendChild(canvas);
 
-        
     };
 
     this.renderColorMap = function() {
 
-       
         var canvas = this.canvas;
         var ctx = canvas.getContext('2d');
 
@@ -709,10 +703,8 @@ function ColorPicker(element,r,g,b) {
             gradient.addColorStop(0.6, 'hsl('+angle+', '+sat+', 40%)');
             gradient.addColorStop(0.7, 'hsl('+angle+', '+sat+', 30%)');
             gradient.addColorStop(0.8, 'hsl('+angle+', '+sat+', 20%)');
-            // gradient.addColorStop(0.9, 'hsl('+angle+', 100%, 10%)');
             gradient.addColorStop(1, 'hsl('+angle+', '+sat+', 5%)');
            
-
             ctx.beginPath();
             ctx.arc(x, y, (1-thickness/2)*radius, startAngle, endAngle, false);
             ctx.lineWidth = radius;
@@ -722,21 +714,6 @@ function ColorPicker(element,r,g,b) {
 
     };
 
-
-    
-   
-    this.plotBg = function(r, g, b){
-
-        var canvas = this.canvas;
-        var ctx = canvas.getContext('2d');
-        var hsl = rgbToHsl(r, g, b);
-
-        var r1 = r; var g1=g; var b1=b;
-        var l = hsl[2];
-       
-    }
-
-   
     this.plotRgb = function(red, g, b, v) {
         var canvas = this.canvas;
         var ctx = canvas.getContext('2d');
@@ -814,14 +791,11 @@ function ColorPicker(element,r,g,b) {
             ctx.fillStyle = strokeColor;
             ctx.fill();
             ctx.restore();
-            // this.drawArrow(ctx,x,y,x2,y2);
-               // console.log(adjusted[red+'.'+g+'.'+b].r); 
         } 
               
     }
 
     this.init();
 }
-
 
 
