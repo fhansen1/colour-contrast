@@ -41,7 +41,7 @@ noUiSlider.create(contrastSlider, {
 
 contrastSlider.noUiSlider.on('end', function (values, handle) {
     cSlider = Math.round( this.get() * 10 ) / 10;
-    document.getElementById("contrastControl").innerHTML = "Contrast: "+cSlider+"<img class='help' alt='Question mark' src='img/q.png' height='14' width='14' onclick='contrastModal.open()'>";
+    
     if(imageObj){
         imageHistogram( offscreenContext, cSlider, dMinSlider, dMaxSlider);
     }

@@ -1,6 +1,6 @@
 
 var imageLoader = document.getElementById('imageLoader');
-imageLoader.addEventListener('change', handleImage, false);
+imageLoader.addEventListener('change', loadImage, false);
 var canvas = document.getElementById('imageCanvas');
 var ctx = canvas.getContext('2d');
 var renderableHeight, renderableWidth;
@@ -8,7 +8,6 @@ var histogram = [];
 var topDetectedColors = [];
 var adjusted = [];
 var start;
-var alreadyIn=[];
 var offScreenCanvas, offscreenContext;
 var oCanvas = document.getElementById("oCanvas");
 var oCtx = oCanvas.getContext("2d");
@@ -27,12 +26,14 @@ var rect = {
     x: oWidth/3,
     y: oHeight/3,
     width: oWidth/3,
-    height: oHeight/3,
-    isDragging: false
+    height: oHeight/3
 };
-oCanvas.onmousedown = myDown;
-oCanvas.onmouseup = myUp;
-oCanvas.onmousemove = myMove;
+oCanvas.onmousedown = mouseDown;
+oCanvas.onmouseup = mouseUp;
+oCanvas.onmousemove = mouseMove;
+oCanvas.touchstart = mouseDown;
+oCanvas.touchend = mouseUp;
+oCanvas.touchmove = mouseMove;
 var pick = new ColorPicker(document.querySelector('.color-space'));
 reDraw();
 function toggleImpairment(){
@@ -82,7 +83,7 @@ function reDraw() {
 
 }
 // handle mousedown events
-function myDown(e) {
+function mouseDown(e) {
 
     // tell the browser we're handling this mouse event
     e.preventDefault();
@@ -93,7 +94,6 @@ function myDown(e) {
     var my = parseInt(e.clientY);
 
     dragok = true;
-    rect.isDragging = true;
 
     startX = mx;
     startY = my;
@@ -101,19 +101,18 @@ function myDown(e) {
 
 
 // handle mouseup events
-function myUp(e) {  
+function mouseUp(e) {  
     // tell the browser we're handling this mouse event
     e.preventDefault();
     e.stopPropagation();
     // clear all the dragging flags
     dragok = false;
-    rect.isDragging = false;
     imageHistogram( offscreenContext, cSlider, dMinSlider, dMaxSlider);
 }
 
 
 // handle mouse moves
-function myMove(e) {
+function mouseMove(e) {
     // if we're dragging anything...
     if (dragok) {
 
@@ -142,7 +141,7 @@ function myMove(e) {
             collidingY = true;
         }
         
-        if (rect.isDragging) {
+        if (dragok) {
 
             if( !collidingX ){
                 rect.x += dx;     
@@ -172,7 +171,7 @@ function myMove(e) {
 }
 //starts when image file is added
 // https://sdqali.in/blog/2013/10/03/fitting-an-image-in-to-a-canvas-object/
-function handleImage(e){
+function loadImage(e){
     var reader = new FileReader();
     
     reader.onload = function(event){
@@ -212,7 +211,7 @@ function handleImage(e){
                 xStart = 0;
                 yStart = 0;
             }
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            // ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.drawImage(imageObj, xStart, yStart, renderableWidth, renderableHeight);
             
             offscreenContext.clearRect(0, 0, imageObj.width, imageObj.height);
@@ -282,37 +281,27 @@ function imageHistogram(canvasImg, zC, zD, zDmax){
     histogram = histogram.sort(function(a, b) {return b.v - a.v;});
    
     topDetectedColors = topColoursAddDelta(histogram);
-    
     topDetectedColors = trimToDeltaDiff(topDetectedColors);
-    
     topDetectedColors = trimToDeltaDiffFG(topDetectedColors, zD, zDmax);
-    
-    
+
     changeConstrastImage(zC, zD, zDmax, imgData);
 }
 
 function changeConstrastImage(desiredContrast, delta, maxDelta, data){
+
+    var r, g, b, a, lumF, contrast, tmpKeys = [];
+    var bgLab = rgb2lab(topDetectedColors[0].r,topDetectedColors[0].g,topDetectedColors[0].b); 
+    lumB = getBrightness(topDetectedColors[0].r,topDetectedColors[0].g,topDetectedColors[0].b);
     reDraw();
     
     adjusted=[];
-    var fCanvas = document.createElement('canvas');
-    var fCtx = fCanvas.getContext('2d');
-    
-    fCtx.clearRect(0, 0, canvas.width, canvas.height);
-    fCtx.putImageData(data, 0, 0);
-    
-    var bgLab = rgb2lab(topDetectedColors[0].r,topDetectedColors[0].g,topDetectedColors[0].b);
-    var fgLab = rgb2lab(topDetectedColors[1].r,topDetectedColors[1].g,topDetectedColors[1].b);
-    
-    lumB = getBrightness(topDetectedColors[0].r,topDetectedColors[0].g,topDetectedColors[0].b);
-    var lumF, contrast, tmpKeys = [];  
     
     for (var i = 0; i < imgData.data.length; i+=4) {
 
-        var r = imgData.data[i];
-        var g = imgData.data[i+1];
-        var b = imgData.data[i+2];
-        var a = imgData.data[i+3];  
+        r = imgData.data[i];
+        g = imgData.data[i+1];
+        b = imgData.data[i+2];
+        a = imgData.data[i+3];  
 
         //only for colors != the background color
         if( r+","+b+","+g !== topDetectedColors[0].r+","+topDetectedColors[0].b+","+topDetectedColors[0].g){
@@ -322,9 +311,15 @@ function changeConstrastImage(desiredContrast, delta, maxDelta, data){
             contrast = getContrast(lumF,lumB);
            
             //comparing similarity with the top 10 colors
-            if( (ciede2000(lab,bgLab) > delta) && (ciede2000(lab,fgLab) < maxDelta) && (desiredContrast > contrast) ) {
+            if( (ciede2000(lab,bgLab) > delta) && (ciede2000(lab,bgLab) < maxDelta) && (desiredContrast > contrast) ) {
                
-                var newRgb = adjustLightness(desiredContrast, lab, lumF, lumB, r, g, b) ;
+                if(!impairment){
+                    var newRgb = adjustLightness(desiredContrast, lab, lumF, lumB, r, g, b);
+                }else{
+                    var newRgb = impairmentLightness(contrast, desiredContrast, lab, lumF, lumB, r, g, b) ;
+                }
+                
+                
                 lumF = getBrightness(newRgb[0],newRgb[1],newRgb[2]);
                 
                 var d=[];                        
@@ -361,16 +356,16 @@ function changeConstrastImage(desiredContrast, delta, maxDelta, data){
         
     }
    
-    oCtx.putImageData(imgData,rect.x,rect.y);
     drawAnalysis();
-    
-    var end = new Date().valueOf();
-    console.log("bench: "+(end-start) );
-    document.getElementById("toast").innerHTML = "<p>"+(end-start)+" ms</p>";
-    setTimeout("document.getElementById('toast').innerHTML = ''", 1300);
     
 }
 function drawAnalysis(){
+
+    oCtx.putImageData(imgData,rect.x,rect.y);
+    var end = new Date().valueOf();
+    document.getElementById("toast").innerHTML = "<p>"+(end-start)+" ms</p>";
+    setTimeout("document.getElementById('toast').innerHTML = ''", 1300);
+
     var oldColor, needCorrectionHtml="", suggestedHtml = "", detectedColours="", h=50, e=0; 
     var bg = "rgb("+topDetectedColors[0].r+","+topDetectedColors[0].g+","+topDetectedColors[0].b+")";
     detectedColours+="<div style='background-color: "+bg+"; height:50px;' onclick='copyRGB(this)' onmouseover='showDetails(this,0)' onmouseout='hideDetails(this)'>BG</div>";
@@ -474,7 +469,7 @@ function showDetails(element,i,a,b){
             }
         }
         if(c < cSlider){
-            if(b){
+            if(b && !impairment){
                 c = c + " (maxed out)";
             }else{
                 c = c + " (!)";   
@@ -501,7 +496,6 @@ var download = document.getElementById("download");
 var image = document.getElementById("oCanvas").toDataURL("image/png")
     .replace("image/png", "image/octet-stream");
 download.setAttribute("href", image);
-//download.setAttribute("download","archive.png");
 }
 
 function trimToDeltaDiff(arr){
@@ -529,7 +523,6 @@ function trimToDeltaDiffFG(arr, delta, deltaMax){
         bgLab = rgb2lab(tmp[0].r, tmp[0].g, tmp[0].b);
 
     }  
-   
     mainLoop:
     for(i = 2; i < arr.length; i++){
        
@@ -590,6 +583,7 @@ function adjustLightness(c, lab, flum, blum, r, g, b){
         count++;
     }
     l = lab[0]; count = 1;
+
     while( l <= 100 ){
         // l equals in
         rgb = lab2rgb( [l, lab[1], lab[2] ] );
@@ -611,32 +605,42 @@ function adjustLightness(c, lab, flum, blum, r, g, b){
     }
     
 }
-function impairmentLightness(c, lab, flum, blum, r, g, b){
+function impairmentLightness(currentContrast, desiredContrast, lab, flum, blum, r, g, b){
     var contrast=0; var count=1;  var brightness, b1, b2;
   
     var rgb = [r,g,b];
     var lab = rgb2lab(r,g,b);
     var l = lab[0];   
-    contrast = getContrast(flum,blum);
-
-    while( (l >= 0) && (l <=100) ){
-        // l equals in
+    var rgb2 = rgb;
+    // contrast = 2,    desiredContrast = 3
+    while( l >= 0 ){
         rgb = lab2rgb( [l, lab[1], lab[2] ] );
         brightness = getBrightness(rgb[0], rgb[1], rgb[2]);
         contrast = getContrast(brightness,blum);
 
-        if( contrast + 0.2 >= c){
+        if( contrast <= currentContrast*0.3){
             return rgb;
         }
         
         l = l - (0.5*count);  
         count++;
-        if( (flum / blum) < 0 ){
-            l = l - (0.5*count);
-        }else{
-            l = l + (0.5*count);
-        }
     }
+    l = lab[0]; count = 1;
+
+    while( l <= 100 ){
+        rgb = lab2rgb( [l, lab[1], lab[2] ] );
+        brightness = getBrightness(rgb[0], rgb[1], rgb[2]);
+        contrast = getContrast(brightness,blum);
+
+        if( contrast <= currentContrast*0.3){
+            return rgb;
+        }
+        
+        l = l + (0.5*count);
+        count++;
+    }
+    
+    return rgb2;
     
 }
 
