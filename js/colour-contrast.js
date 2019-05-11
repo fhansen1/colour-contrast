@@ -31,9 +31,7 @@ var rect = {
 oCanvas.onmousedown = mouseDown;
 oCanvas.onmouseup = mouseUp;
 oCanvas.onmousemove = mouseMove;
-oCanvas.touchstart = mouseDown;
-oCanvas.touchend = mouseUp;
-oCanvas.touchmove = mouseMove;
+
 var pick = new ColorPicker(document.querySelector('.color-space'));
 reDraw();
 function toggleImpairment(){
@@ -87,7 +85,7 @@ function mouseDown(e) {
 
     // tell the browser we're handling this mouse event
     e.preventDefault();
-    e.stopPropagation();
+    // e.stopPropagation();
 
     // get the current mouse position
     var mx = parseInt(e.clientX);
@@ -104,7 +102,7 @@ function mouseDown(e) {
 function mouseUp(e) {  
     // tell the browser we're handling this mouse event
     e.preventDefault();
-    e.stopPropagation();
+    // e.stopPropagation();
     // clear all the dragging flags
     dragok = false;
     imageHistogram( offscreenContext, cSlider, dMinSlider, dMaxSlider);
@@ -118,7 +116,7 @@ function mouseMove(e) {
 
         // tell the browser we're handling this mouse event
         e.preventDefault();
-        e.stopPropagation();
+        // e.stopPropagation();
 
         // get the current mouse position
         var mx = parseInt(e.clientX);
