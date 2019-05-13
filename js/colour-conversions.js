@@ -146,7 +146,7 @@ function ciede2000(c1,c2)
   var L2 = c2[0];
   var a2 = c2[1];
   var b2 = c2[2];
-// console.log(L2);
+
   // Weight factors
   var kL = 1;
   var kC = 1;

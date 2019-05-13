@@ -16,7 +16,7 @@ deltaMinMaxSlider.noUiSlider.on('end', function (values, handle) {
     dMaxSlider = Math.round( this.get()[1] );
     document.getElementById("deltaControl").innerHTML = "ΔE* range: ["+dMinSlider+", "+dMaxSlider+"]<img class='help' alt='Question mark' src='img/q.png' height='14' width='14' onclick='deltaModal.open()'>";
     if(imageObj){
-        imageHistogram( offscreenContext, cSlider, dMinSlider, dMaxSlider);
+        imageHistogram();
     }  
 });
 deltaMinMaxSlider.noUiSlider.on('update', function (values, handle) {
@@ -43,7 +43,7 @@ contrastSlider.noUiSlider.on('end', function (values, handle) {
     cSlider = Math.round( this.get() * 10 ) / 10;
     
     if(imageObj){
-        imageHistogram( offscreenContext, cSlider, dMinSlider, dMaxSlider);
+        imageHistogram();
     }
 });
 contrastSlider.noUiSlider.on('update', function (values, handle) {

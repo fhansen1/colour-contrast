@@ -4,16 +4,15 @@ imageLoader.addEventListener('change', loadImage, false);
 var canvas = document.getElementById('imageCanvas');
 var ctx = canvas.getContext('2d');
 var renderableHeight, renderableWidth;
-var histogram = [];
-var topDetectedColors = [];
+var topDetectedColours = [];
 var adjusted = [];
 var start;
-var offScreenCanvas, offscreenContext;
+
 var oCanvas = document.getElementById("oCanvas");
 var oCtx = oCanvas.getContext("2d");
 var oWidth = oCanvas.width;
 var oHeight = oCanvas.height;
-var dragok = false;
+var okToMove = false;
 var myopacity = 0;
 var startX;
 var startY;
@@ -32,7 +31,7 @@ oCanvas.onmousedown = mouseDown;
 oCanvas.onmouseup = mouseUp;
 oCanvas.onmousemove = mouseMove;
 
-var pick = new ColorPicker(document.querySelector('.color-space'));
+var pick = new ColourCircle(document.querySelector('.color-space'));
 reDraw();
 function toggleImpairment(){
     if(impairment){
@@ -43,23 +42,23 @@ function toggleImpairment(){
         document.getElementById("impairToggle").innerHTML = "On";
     }
     if(imageObj){
-        imageHistogram( offscreenContext, cSlider, dMinSlider, dMaxSlider);
+        imageHistogram();
     }
 }
 function toggleSaturation(){
     if(saturation){
         saturation = false;
-        pick = new ColorPicker(document.querySelector('.color-space'));
+        pick = new ColourCircle(document.querySelector('.color-space'));
     }else{
         saturation = true;
-        pick = new ColorPicker(document.querySelector('.color-space'));
+        pick = new ColourCircle(document.querySelector('.color-space'));
     }
-    for(i=1;i<topDetectedColors.length;i++){
+    for(i=1;i<topDetectedColours.length;i++){
 
         if(i > 5){
             break;
         }
-        pick.plotRgb(topDetectedColors[i].r, topDetectedColors[i].g, topDetectedColors[i].b, i);
+        pick.plotRgb(topDetectedColours[i].r, topDetectedColours[i].g, topDetectedColours[i].b, i);
     }
 }
 // redraw the scene
@@ -80,45 +79,38 @@ function reDraw() {
     oCtx.stroke();
 
 }
-// handle mousedown events
+
 function mouseDown(e) {
 
-    // tell the browser we're handling this mouse event
     e.preventDefault();
-    // e.stopPropagation();
+    e.stopPropagation();
 
-    // get the current mouse position
     var mx = parseInt(e.clientX);
     var my = parseInt(e.clientY);
 
-    dragok = true;
+    okToMove = true;
 
     startX = mx;
     startY = my;
 }
 
 
-// handle mouseup events
 function mouseUp(e) {  
-    // tell the browser we're handling this mouse event
+   
     e.preventDefault();
-    // e.stopPropagation();
-    // clear all the dragging flags
-    dragok = false;
-    imageHistogram( offscreenContext, cSlider, dMinSlider, dMaxSlider);
+    e.stopPropagation();
+    okToMove = false;
+    imageHistogram();
 }
 
 
-// handle mouse moves
 function mouseMove(e) {
     // if we're dragging anything...
-    if (dragok) {
+    if (okToMove) {
 
-        // tell the browser we're handling this mouse event
         e.preventDefault();
-        // e.stopPropagation();
+        e.stopPropagation();
 
-        // get the current mouse position
         var mx = parseInt(e.clientX);
         var my = parseInt(e.clientY);
         var collidingX = false;
@@ -134,12 +126,10 @@ function mouseMove(e) {
         if( (rect.x <= 0) || (rect.x >= oWidth - (oWidth/3)) ){
             collidingX = true;
         }
-       
         if( (rect.y <= 0) || (rect.y >= oHeight - (oHeight/3)) ){
             collidingY = true;
         }
-        
-        if (dragok) {
+        if (okToMove) {
 
             if( !collidingX ){
                 rect.x += dx;     
@@ -148,15 +138,13 @@ function mouseMove(e) {
                 if(rect.x >= oWidth - (oWidth/3)){ rect.x = rect.x - 1; }
                 collidingX = false;
             }
-
             if( !collidingY ){
                 rect.y += dy;   
             }else{
                 if(rect.y <= 0){ rect.y = 1; }
                 if(rect.y >= oHeight - (oHeight/3) ){ rect.y = rect.y - 1; }
                 collidingY = false;
-            }
-            
+            }  
         }
        
         // redraw the scene with the new rect positions
@@ -180,10 +168,7 @@ function loadImage(e){
             var imageAspectRatio = imageObj.width / imageObj.height;
             var canvasAspectRatio = canvas.width / canvas.height;
             var xStart, yStart;
-            offScreenCanvas = document.createElement('canvas');
-            offScreenCanvas.width = imageObj.width;
-            offScreenCanvas.height = imageObj.height;
-            offscreenContext = offScreenCanvas.getContext("2d");
+        
             // If image's aspect ratio is less than canvas's we fit on height
             // and place the image centrally along width
             if(imageAspectRatio < canvasAspectRatio) {
@@ -209,17 +194,13 @@ function loadImage(e){
                 xStart = 0;
                 yStart = 0;
             }
-            // ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.drawImage(imageObj, xStart, yStart, renderableWidth, renderableHeight);
-            
-            offscreenContext.clearRect(0, 0, imageObj.width, imageObj.height);
-            offscreenContext.drawImage(imageObj, 0, 0, imageObj.width, imageObj.height);
+
             document.getElementById("design").setAttribute("style", "display: none;");
             
             fadeOpacity();
-           
-            imageHistogram( offscreenContext, cSlider, dMinSlider, dMaxSlider );
-            
+            imageHistogram();
             
         };
         imageObj.src = event.target.result;
@@ -235,15 +216,13 @@ function fadeOpacity() {
    document.getElementById('dl').style.opacity = myopacity;
 }
 //main method for now
-function imageHistogram(canvasImg, zC, zD, zDmax){
+function imageHistogram(){
     start = new Date().valueOf();
-    histogram = []; topDetectedColors = []; adjusted=[];
-   
-    
+    topDetectedColours = []; 
     var tmpKeys=[]; 
     var r, g, b, a, index;
-    width = canvas.width; height = canvas.height;
-    imgData = ctx.getImageData(rect.x, rect.y, width/3, height/3);
+    var width = canvas.width; var height = canvas.height;
+    var imgData = ctx.getImageData(rect.x, rect.y, width/3, height/3);
     
     //loops through the centre of the image
     for (var i = 0; i < imgData.data.length; i+=16) {
@@ -260,41 +239,35 @@ function imageHistogram(canvasImg, zC, zD, zDmax){
         index = tmpKeys.indexOf(r+"."+g+"."+b);
 
         //Inserting values if new color
-        if( !histogram[ index ] ) {
+        if( !topDetectedColours[ index ] ) {
 
-            histogram[ index ] = {
+            topDetectedColours[ index ] = {
                 v: 1, r : r, b : b, g: g
             };
                
         }
         //Already exists. Incrementing occurences value 
         else{
-            histogram[ index ].v = histogram[ index ].v + 1;   
-        }
-            
-        
+            topDetectedColours[ index ].v = topDetectedColours[ index ].v + 1;   
+        }  
     }
-    tmpKeys = null;
-    
-    //sorting by number of occurences (v)
-    histogram = histogram.sort(function(a, b) {return b.v - a.v;});
    
-    topDetectedColors = topColoursAddDelta(histogram);
-    topDetectedColors = trimToDeltaDiff(topDetectedColors);
-    topDetectedColors = trimToDeltaDiffFG(topDetectedColors, zD, zDmax);
+    //sorting by number of occurences (v)
+    topDetectedColours = topDetectedColours.sort(function(a, b) {return b.v - a.v;});
+    topDetectedColours = topColoursAddDelta(topDetectedColours);
+    topDetectedColours = trimToDeltaDiff(topDetectedColours);
+    topDetectedColours = trimToDeltaDiffFG(topDetectedColours);
 
-    changeConstrastImage(zC, zD, zDmax, imgData);
+    changeConstrastImage(imgData);
 }
 
-function changeConstrastImage(desiredContrast, delta, maxDelta, data){
+function changeConstrastImage(imgData){
 
     var r, g, b, a, lumF, contrast, tmpKeys = [];
-    var bgLab = rgb2lab(topDetectedColors[0].r,topDetectedColors[0].g,topDetectedColors[0].b); 
-    lumB = getBrightness(topDetectedColors[0].r,topDetectedColors[0].g,topDetectedColors[0].b);
-    reDraw();
-    
+    var bgLab = rgb2lab(topDetectedColours[0].r,topDetectedColours[0].g,topDetectedColours[0].b); 
+    lumB = getRelLuminance(topDetectedColours[0].r,topDetectedColours[0].g,topDetectedColours[0].b);
     adjusted=[];
-    
+
     for (var i = 0; i < imgData.data.length; i+=4) {
 
         r = imgData.data[i];
@@ -303,34 +276,27 @@ function changeConstrastImage(desiredContrast, delta, maxDelta, data){
         a = imgData.data[i+3];  
 
         //only for colors != the background color
-        if( r+","+b+","+g !== topDetectedColors[0].r+","+topDetectedColors[0].b+","+topDetectedColors[0].g){
+        if( r+","+b+","+g !== topDetectedColours[0].r+","+topDetectedColours[0].b+","+topDetectedColours[0].g){
         
             var lab = rgb2lab(r,g,b);
-            lumF = getBrightness(r,g,b);
+            lumF = getRelLuminance(r,g,b);
             contrast = getContrast(lumF,lumB);
            
-            //comparing similarity with the top 10 colors
-            if( (ciede2000(lab,bgLab) > delta) && (ciede2000(lab,bgLab) < maxDelta) && (desiredContrast > contrast) ) {
+            //if within delta values and contrast is less than slider value
+            if( (ciede2000(lab,bgLab) > dMinSlider) && (ciede2000(lab,bgLab) < dMaxSlider) && (cSlider > contrast) ) {
                
                 if(!impairment){
-                    var newRgb = adjustLightness(desiredContrast, lab, lumF, lumB, r, g, b);
+                    var newRgb = adjustLightness(cSlider, lab, lumB, r, g, b);
                 }else{
-                    var newRgb = impairmentLightness(contrast, desiredContrast, lab, lumF, lumB, r, g, b) ;
+                    var newRgb = impairmentLightness(contrast, cSlider, lab, lumB, r, g, b) ;
                 }
-                
-                
-                lumF = getBrightness(newRgb[0],newRgb[1],newRgb[2]);
-                
-                var d=[];                        
-                d[0]   = Math.round(newRgb[0]);
-                d[1]   = Math.round(newRgb[1]);
-                d[2]   = Math.round(newRgb[2]);
-                d[3]   = a;
+                lumF = getRelLuminance(newRgb[0],newRgb[1],newRgb[2]);
+                var d = [ Math.round(newRgb[0]), Math.round(newRgb[1]), Math.round(newRgb[2]), a ];                        
                 
                 imgData.data[i]   = d[0];
                 imgData.data[i+1] = d[1];
                 imgData.data[i+2] = d[2];
-                imgData.data[i+3] = a;
+                imgData.data[i+3] = d[3];
                 
                 //Helper array to make final array indexed
                 if( tmpKeys.indexOf(r+"."+g+"."+b) == -1) {
@@ -341,7 +307,7 @@ function changeConstrastImage(desiredContrast, delta, maxDelta, data){
                 //Inserting values if new color
                 if( !adjusted[ r+"."+g+"."+b ] ) {
                     adjusted[ r+"."+g+"."+b ] = {
-                        v: 1, r : d[0], g : d[1], b: d[2], x: 0, y: 0, c: Math.round(getContrast(lumF,lumB)*10) / 10
+                        v: 1, r : d[0], g : d[1], b: d[2], c: Math.round(getContrast(lumF,lumB)*10) / 10
                     };
                 }
                 //Already exists. Incrementing occurences value 
@@ -355,46 +321,45 @@ function changeConstrastImage(desiredContrast, delta, maxDelta, data){
         
     }
    
-    drawAnalysis();
+    drawAnalysis(imgData);
     
 }
-function drawAnalysis(){
+function drawAnalysis(imgData){
 
     oCtx.putImageData(imgData,rect.x,rect.y);
 
-    var oldColor, needCorrectionHtml="", suggestedHtml = "", detectedColours="", h=50, e=0; 
-    var bg = "rgb("+topDetectedColors[0].r+","+topDetectedColors[0].g+","+topDetectedColors[0].b+")";
-    detectedColours+="<div style='background-color: "+bg+"; height:50px;' onclick='copyRGB(this)' onmouseover='showDetails(this,0)' onmouseout='hideDetails(this)'>BG</div>";
+    var oldColour, h=50, e=0; 
+    var bg = "rgb("+topDetectedColours[0].r+","+topDetectedColours[0].g+","+topDetectedColours[0].b+")";
+    var needCorrectionHtml="", suggestedHtml = ""
+    var detectedColours="<div style='background-color: "+bg+"; height:50px;' onclick='copyRGB(this)' onmouseover='showDetails(this,0)' onmouseout='hideDetails(this)'>BG</div>";
 
-    document.getElementById("suggestion").innerHTML = ""; 
     document.getElementById('message').innerHTML = "";
-    pick = new ColorPicker(document.querySelector('.color-space'));
+    pick = new ColourCircle(document.querySelector('.color-space'));
     
-     
-    for(i=1; (i<topDetectedColors.length) && (i<=5);i++){
+    for(i=1; (i<topDetectedColours.length) && (i<=5);i++){
 
         h = h - (h*0.15);
-        pick.plotRgb(topDetectedColors[i].r, topDetectedColors[i].g, topDetectedColors[i].b, i);
-        oldColor = topDetectedColors[i].r+","+topDetectedColors[i].g+","+topDetectedColors[i].b;
+        pick.plotRgb(topDetectedColours[i].r, topDetectedColours[i].g, topDetectedColours[i].b, i);
+        oldColour = topDetectedColours[i].r+","+topDetectedColours[i].g+","+topDetectedColours[i].b;
         
-        var c = topDetectedColors[i].r+"."+topDetectedColors[i].g+"."+topDetectedColors[i].b;
-        detectedColours+="<div class='detected' style='background-color: rgb("+oldColor+"); height:"+h+"px' onclick='copyRGB(this)' onmouseover='showDetails(this,"+i+")' onmouseout='hideDetails(this)'>"+i+"</div>"; 
+        var c = topDetectedColours[i].r+"."+topDetectedColours[i].g+"."+topDetectedColours[i].b;
+        detectedColours+="<div class='detected' style='background-color: rgb("+oldColour+"); height:"+h+"px' onclick='copyRGB(this)' onmouseover='showDetails(this,"+i+")' onmouseout='hideDetails(this)'>"+i+"</div>"; 
         if( adjusted[c] != undefined){
               
-            needCorrectionHtml += "<div class ='changed' style='background-color: rgb("+oldColor+");' onclick='copyRGB(this)' onmouseover='showDetails(this,"+i+")' onmouseout='hideDetails(this)'>"+i+"</div>";    
+            needCorrectionHtml += "<div class ='changed' style='background-color: rgb("+oldColour+");' onclick='copyRGB(this)' onmouseover='showDetails(this,"+i+")' onmouseout='hideDetails(this)'>"+i+"</div>";    
             suggestedHtml += "<div class ='changed' style='background-color: rgb("+adjusted[c].r+","+adjusted[c].g+","+adjusted[c].b+");' onclick='copyRGB(this)' onmouseover='showDetails(this,"+i+",a,b)' onmouseout='hideDetails(this)'>"+i+"</div>";
             e++;
         }
-    
-    }
-    if( suggestedHtml === ""){
-        document.getElementById('message').innerHTML = "<p>Contrast requirement is met or no colours within ΔE* range</p>";
     }
 
     document.getElementById('topColours').innerHTML = detectedColours;      //Horiztonal histogram
     document.getElementById('histogram').innerHTML = needCorrectionHtml;    //Colours that need to change
     document.getElementById('suggestion').innerHTML = suggestedHtml;        //Changed colours
     document.getElementById('corrections').style.height = e*38+"px";
+
+    if( suggestedHtml === ""){
+        document.getElementById('message').innerHTML = "<p>Contrast requirement is met or no colours within ΔE* range</p>";
+    }
     var end = new Date().valueOf();
     document.getElementById("toast").innerHTML = "<p>"+(end-start)+" ms</p>";
     setTimeout("document.getElementById('toast').innerHTML = ''", 1300);
@@ -416,26 +381,26 @@ function copyRGB(element) {
 
 function showDetails(element,i,a,b){
     var rgb = getComputedStyle(element).getPropertyValue("background-color");
-    var bg = "rgb("+topDetectedColors[0].r+", "+topDetectedColors[0].g+", "+topDetectedColors[0].b+")";
+    var bg = "rgb("+topDetectedColours[0].r+", "+topDetectedColours[0].g+", "+topDetectedColours[0].b+")";
     document.getElementById('details').style.display = "block";
     document.getElementById('details').style.zIndex = "99";
     document.getElementById('details').style.background = bg;
 
     if(i>0){
-        var lum = getBrightness(topDetectedColors[i].r, topDetectedColors[i].g, topDetectedColors[i].b);
-        var delta = topDetectedColors[i].dE.toFixed(2);
+        var lum = getRelLuminance(topDetectedColours[i].r, topDetectedColours[i].g, topDetectedColours[i].b);
+        var delta = topDetectedColours[i].dE.toFixed(2);
         if(a){
-            var c = topDetectedColors[i].r+"."+topDetectedColors[i].g+"."+topDetectedColors[i].b;
-            delta = ciede2000( rgb2lab(adjusted[c].r, adjusted[c].g, adjusted[c].b), rgb2lab(topDetectedColors[0].r, topDetectedColors[0].g, topDetectedColors[0].b));
+            var c = topDetectedColours[i].r+"."+topDetectedColours[i].g+"."+topDetectedColours[i].b;
+            delta = ciede2000( rgb2lab(adjusted[c].r, adjusted[c].g, adjusted[c].b), rgb2lab(topDetectedColours[0].r, topDetectedColours[0].g, topDetectedColours[0].b));
             delta = delta.toFixed(2);
-            lum = getBrightness(adjusted[c].r, adjusted[c].g, adjusted[c].b);
+            lum = getRelLuminance(adjusted[c].r, adjusted[c].g, adjusted[c].b);
         }
 
         var c = getContrast(lum,lumB);
         c = c.toFixed(2);
-        var v = topDetectedColors[i].v;
+        var v = topDetectedColours[i].v;
         if(i > 1){
-            v = ( v / topDetectedColors[1].v ) * 100;
+            v = ( v / topDetectedColours[1].v ) * 100;
         }else{
             v = 100;
         }
@@ -470,10 +435,10 @@ function showDetails(element,i,a,b){
             }
             
         }
-        document.getElementById('details').innerHTML += "<div class='info'><p> Colour: "+rgb+"</p><p>Brightness: "+lum.toFixed(2)+"</p><p>Contrast: "+c+"</p><p> ΔE*: "+delta+"</p><p>Instances: "+topDetectedColors[i].v+"</p><p>this/top FG: "+v.toFixed(2)+"%</p></div>";
+        document.getElementById('details').innerHTML += "<div class='info'><p> Colour: "+rgb+"</p><p>Brightness: "+lum.toFixed(2)+"</p><p>Contrast: "+c+"</p><p> ΔE*: "+delta+"</p><p>Instances: "+topDetectedColours[i].v+"</p><p>this/top FG: "+v.toFixed(2)+"%</p></div>";
         document.getElementById('details').innerHTML += "<div class='readThis' style='"+bg+";'><p style='font-size:8px;color:"+rgb+"'>Can you read this?</p><p style='color:"+rgb+"'>Can you read this?</p><p style='font-size:30px;color:"+rgb+"'>Can you read this?</p><p style='font-size:40px;color:"+rgb+"'>Can you read this?</p></div>";
     }else{
-        document.getElementById('details').innerHTML = "<div class='info'><p><b>Calculated background colour:</b></p><p> Colour: "+rgb+"</p><p>Brightness: "+lumB.toFixed(2)+"</p><p>Instances: "+topDetectedColors[i].v+"</p></div>";
+        document.getElementById('details').innerHTML = "<div class='info'><p><b>Calculated background colour:</b></p><p> Colour: "+rgb+"</p><p>Brightness: "+lumB.toFixed(2)+"</p><p>Instances: "+topDetectedColours[i].v+"</p></div>";
     }
 }
 
@@ -492,51 +457,6 @@ var image = document.getElementById("oCanvas").toDataURL("image/png")
 download.setAttribute("href", image);
 }
 
-function trimToDeltaDiff(arr){
-    var tmp=[];
-    tmp[0]=histogram[0];
-    for(i=1;i<arr.length;i++){
-        if(arr[i].dE > 3){
-            tmp.push(histogram[i]);
-        }
-    }
-    return tmp;
-}
-
-function trimToDeltaDiffFG(arr, delta, deltaMax){
-    // console.log(arr);
-    var tmp=[];
-    var mainFgLab, tmpLab, tmpLab2, bgLab, mainFgAmount;
-
-    tmp[0]=arr[0]; 
-    // tmp[1]=arr[1];
-    if(arr[1] != undefined){
-        tmp.push(arr[1]);  
-        mainFgLab = rgb2lab(arr[1].r, arr[1].g, arr[1].b);  
-        mainFgAmount = arr[1].v;
-        bgLab = rgb2lab(tmp[0].r, tmp[0].g, tmp[0].b);
-
-    }  
-    mainLoop:
-    for(i = 2; i < arr.length; i++){
-       
-        tmpLab = rgb2lab(arr[i].r, arr[i].g, arr[i].b);
-
-        //checks if color is within delta limit, background and main foreground colour
-        if( (ciede2000(tmpLab, mainFgLab) > delta) && (ciede2000(tmpLab, bgLab) < deltaMax) && (ciede2000(tmpLab, bgLab) > delta)){
-    
-                for(j = 0; j < tmp.length; j++){
-                    
-                    if( ciede2000(tmpLab, rgb2lab(tmp[j].r, tmp[j].g, tmp[j].b)) < delta){
-                        continue mainLoop;
-                    }
-                }
-                tmp.push(arr[i]);    
-        }
-    }
-
-    return tmp;
-}
 function topColoursAddDelta(top){
     var bg = rgb2lab(top[0].r,top[0].g,top[0].b);
     for(i=1;i<top.length;i++){
@@ -545,6 +465,51 @@ function topColoursAddDelta(top){
     }
     return top;
 }
+function trimToDeltaDiff(arr){
+    var tmp=[];
+    tmp[0]=topDetectedColours[0];
+    for(i=1;i<arr.length;i++){
+        if(arr[i].dE >= 3){
+            tmp.push(topDetectedColours[i]);
+        }
+    }
+    return tmp;
+}
+
+function trimToDeltaDiffFG(arr){
+
+    var tmp=[];
+    var mainFgLab, tmpLab, tmpLab2, bgLab, mainFgAmount;
+
+    tmp[0]=arr[0]; 
+
+    if(arr[1] != undefined){
+        tmp.push(arr[1]);  
+        mainFgLab = rgb2lab(arr[1].r, arr[1].g, arr[1].b);  
+        mainFgAmount = arr[1].v;
+        bgLab = rgb2lab(tmp[0].r, tmp[0].g, tmp[0].b);
+    }  
+    
+    mainLoop:
+    for(i = 1; i+1 < arr.length; i++){
+
+        tmpLab = rgb2lab(arr[i].r, arr[i].g, arr[i].b); 
+ 
+        // checks if color is within delta limit, background and main foreground colour
+        if( (ciede2000(tmpLab, mainFgLab) > dMinSlider) && (ciede2000(tmpLab, bgLab) < dMaxSlider) && (ciede2000(tmpLab, bgLab) > dMinSlider)){
+    
+                for(j = 0; j < tmp.length; j++){
+                    if( ciede2000(tmpLab, rgb2lab(tmp[j].r, tmp[j].g, tmp[j].b)) < dMinSlider){
+                        continue mainLoop;
+                    }
+                }
+                tmp.push(arr[i]);    
+        }
+    }
+    tmp = tmp.slice(0,6);
+    return tmp;
+}
+
 function getContrast(flum,blum){
     var L1 = Math.max(flum,blum);
     var L2 = Math.min(flum,blum);
@@ -552,19 +517,18 @@ function getContrast(flum,blum){
     return ratio;
 }
 
-function getBrightness(r, g, b) {
+function getRelLuminance(r, g, b) {
     var a = [r, g, b].map(function (v) {
         v /= 255;
         return v <= 0.03928
             ? v / 12.92
             : Math.pow( (v + 0.055) / 1.055, 2.4 );
     });
-    
     return a[0] * 0.2126 + a[1] * 0.7152 + a[2] * 0.0722;
 }
 
 
-function adjustLightness(c, lab, flum, blum, r, g, b){
+function adjustLightness(c, lab, blum, r, g, b){
     
     var rgb, brightness, b1, b2;
     var contrast=0, count=1, l = lab[0];   
@@ -572,7 +536,7 @@ function adjustLightness(c, lab, flum, blum, r, g, b){
     while( l >= 0 ){
         // l equals in
         rgb = lab2rgb( [l, lab[1], lab[2] ] );
-        brightness = getBrightness(rgb[0], rgb[1], rgb[2]);
+        brightness = getRelLuminance(rgb[0], rgb[1], rgb[2]);
         contrast = getContrast(brightness,blum);
 
         if( contrast >= c){
@@ -588,7 +552,7 @@ function adjustLightness(c, lab, flum, blum, r, g, b){
     while( l <= 100 ){
         // l equals in
         rgb = lab2rgb( [l, lab[1], lab[2] ] );
-        brightness = getBrightness(rgb[0], rgb[1], rgb[2]);
+        brightness = getRelLuminance(rgb[0], rgb[1], rgb[2]);
         contrast = getContrast(brightness,blum);
         if( contrast >= c){
             return rgb;
@@ -606,17 +570,17 @@ function adjustLightness(c, lab, flum, blum, r, g, b){
     }
     
 }
-function impairmentLightness(currentContrast, desiredContrast, lab, flum, blum, r, g, b){
+function impairmentLightness(currentContrast, cSlider, lab, blum, r, g, b){
     var contrast=0; var count=1;  var brightness, b1, b2;
   
     var rgb = [r,g,b];
     var lab = rgb2lab(r,g,b);
     var l = lab[0];   
     var rgb2 = rgb;
-    // contrast = 2,    desiredContrast = 3
+    // contrast = 2,    cSlider = 3
     while( l >= 0 ){
         rgb = lab2rgb( [l, lab[1], lab[2] ] );
-        brightness = getBrightness(rgb[0], rgb[1], rgb[2]);
+        brightness = getRelLuminance(rgb[0], rgb[1], rgb[2]);
         contrast = getContrast(brightness,blum);
 
         if( contrast <= currentContrast*0.3){
@@ -630,7 +594,7 @@ function impairmentLightness(currentContrast, desiredContrast, lab, flum, blum, 
 
     while( l <= 100 ){
         rgb = lab2rgb( [l, lab[1], lab[2] ] );
-        brightness = getBrightness(rgb[0], rgb[1], rgb[2]);
+        brightness = getRelLuminance(rgb[0], rgb[1], rgb[2]);
         contrast = getContrast(brightness,blum);
 
         if( contrast <= currentContrast*0.3){
@@ -645,7 +609,7 @@ function impairmentLightness(currentContrast, desiredContrast, lab, flum, blum, 
     
 }
 
-function ColorPicker(element,r,g,b) {
+function ColourCircle(element,r,g,b) {
 
     document.getElementById("cs").innerHTML = '';
     this.element = element;
