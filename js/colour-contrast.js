@@ -227,6 +227,7 @@ function loadImage(e){
     reader.readAsDataURL(e.target.files[0]);  
 }
 function fadeOpacity() {
+    document.getElementById('dl').style.display = "block";
    if (myopacity<1) {
       myopacity += .075;
      setTimeout(function(){fadeOpacity()},100);
@@ -360,9 +361,6 @@ function changeConstrastImage(desiredContrast, delta, maxDelta, data){
 function drawAnalysis(){
 
     oCtx.putImageData(imgData,rect.x,rect.y);
-    var end = new Date().valueOf();
-    document.getElementById("toast").innerHTML = "<p>"+(end-start)+" ms</p>";
-    setTimeout("document.getElementById('toast').innerHTML = ''", 1300);
 
     var oldColor, needCorrectionHtml="", suggestedHtml = "", detectedColours="", h=50, e=0; 
     var bg = "rgb("+topDetectedColors[0].r+","+topDetectedColors[0].g+","+topDetectedColors[0].b+")";
@@ -373,35 +371,33 @@ function drawAnalysis(){
     pick = new ColorPicker(document.querySelector('.color-space'));
     
      
-    for(i=1;i<topDetectedColors.length;i++){
+    for(i=1; (i<topDetectedColors.length) && (i<=5);i++){
 
-        if(i > 5){
-            break;
-        }
         h = h - (h*0.15);
         pick.plotRgb(topDetectedColors[i].r, topDetectedColors[i].g, topDetectedColors[i].b, i);
         oldColor = topDetectedColors[i].r+","+topDetectedColors[i].g+","+topDetectedColors[i].b;
         
         var c = topDetectedColors[i].r+"."+topDetectedColors[i].g+"."+topDetectedColors[i].b;
-        
+        detectedColours+="<div class='detected' style='background-color: rgb("+oldColor+"); height:"+h+"px' onclick='copyRGB(this)' onmouseover='showDetails(this,"+i+")' onmouseout='hideDetails(this)'>"+i+"</div>"; 
         if( adjusted[c] != undefined){
-            detectedColours+="<div class='detected' style='background-color: rgb("+oldColor+"); height:"+h+"px' onclick='copyRGB(this)' onmouseover='showDetails(this,"+i+")' onmouseout='hideDetails(this)'>"+i+"</div>";   
+              
             needCorrectionHtml += "<div class ='changed' style='background-color: rgb("+oldColor+");' onclick='copyRGB(this)' onmouseover='showDetails(this,"+i+")' onmouseout='hideDetails(this)'>"+i+"</div>";    
             suggestedHtml += "<div class ='changed' style='background-color: rgb("+adjusted[c].r+","+adjusted[c].g+","+adjusted[c].b+");' onclick='copyRGB(this)' onmouseover='showDetails(this,"+i+",a,b)' onmouseout='hideDetails(this)'>"+i+"</div>";
             e++;
         }
-        else{
-            detectedColours+="<div style='background-color: rgb("+oldColor+"); height:"+h+"px' onclick='copyRGB(this)' onmouseover='showDetails(this,"+i+")' onmouseout='hideDetails(this)'>"+i+"</div>";
-           }
+    
     }
     if( suggestedHtml === ""){
         document.getElementById('message').innerHTML = "<p>Contrast requirement is met or no colours within ΔE* range</p>";
     }
-   
-    document.getElementById('topColours').innerHTML = detectedColours;
-    document.getElementById('histogram').innerHTML = needCorrectionHtml;
-    document.getElementById('suggestion').innerHTML = suggestedHtml;
+
+    document.getElementById('topColours').innerHTML = detectedColours;      //Horiztonal histogram
+    document.getElementById('histogram').innerHTML = needCorrectionHtml;    //Colours that need to change
+    document.getElementById('suggestion').innerHTML = suggestedHtml;        //Changed colours
     document.getElementById('corrections').style.height = e*38+"px";
+    var end = new Date().valueOf();
+    document.getElementById("toast").innerHTML = "<p>"+(end-start)+" ms</p>";
+    setTimeout("document.getElementById('toast').innerHTML = ''", 1300);
 }
 function copyRGB(element) {
     
@@ -541,7 +537,14 @@ function trimToDeltaDiffFG(arr, delta, deltaMax){
 
     return tmp;
 }
-
+function topColoursAddDelta(top){
+    var bg = rgb2lab(top[0].r,top[0].g,top[0].b);
+    for(i=1;i<top.length;i++){
+        lab = rgb2lab(top[i].r,top[i].g,top[i].b);
+        top[i].dE = ciede2000(bg, lab);
+    }
+    return top;
+}
 function getContrast(flum,blum){
     var L1 = Math.max(flum,blum);
     var L2 = Math.min(flum,blum);
@@ -641,16 +644,6 @@ function impairmentLightness(currentContrast, desiredContrast, lab, flum, blum, 
     return rgb2;
     
 }
-
-function topColoursAddDelta(top){
-    var bg = rgb2lab(top[0].r,top[0].g,top[0].b);
-    for(i=1;i<top.length;i++){
-        lab = rgb2lab(top[i].r,top[i].g,top[i].b);
-        top[i].dE = ciede2000(bg, lab);
-    }
-    return top;
-}
-
 
 function ColorPicker(element,r,g,b) {
 

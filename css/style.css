@@ -185,7 +185,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00000000', e
     margin-top: 30px;
     margin-bottom: 30px;
 }
-#dl{opacity: 0;}
+#dl{opacity: 0; display: none;}
 #data{
 	display: inline-block;
 	float:left;
