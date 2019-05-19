@@ -254,6 +254,8 @@ function imageHistogram(){
    
     //sorting by number of occurences (v)
     topDetectedColours = topDetectedColours.sort(function(a, b) {return b.v - a.v;});
+    
+    //filters<
     topDetectedColours = topColoursAddDelta(topDetectedColours);
     topDetectedColours = trimToDeltaDiff(topDetectedColours);
     topDetectedColours = trimToDeltaDiffFG(topDetectedColours);
@@ -281,14 +283,14 @@ function changeConstrastImage(imgData){
             var lab = rgb2lab(r,g,b);
             lumF = getRelLuminance(r,g,b);
             contrast = getContrast(lumF,lumB);
-           
+
             //if within delta values and contrast is less than slider value
             if( (ciede2000(lab,bgLab) > dMinSlider) && (ciede2000(lab,bgLab) < dMaxSlider) && (cSlider > contrast) ) {
                
                 if(!impairment){
                     var newRgb = adjustLightness(cSlider, lab, lumB, r, g, b);
                 }else{
-                    var newRgb = impairmentLightness(contrast, cSlider, lab, lumB, r, g, b) ;
+                    var newRgb = impairmentLightness(cSlider, lab, lumB, r, g, b) ;
                 }
                 lumF = getRelLuminance(newRgb[0],newRgb[1],newRgb[2]);
                 var d = [ Math.round(newRgb[0]), Math.round(newRgb[1]), Math.round(newRgb[2]), a ];                        
@@ -530,20 +532,20 @@ function getRelLuminance(r, g, b) {
 
 function adjustLightness(c, lab, blum, r, g, b){
     
-    var rgb, brightness, b1, b2;
+    var rgb, relLum, b1, b2;
     var contrast=0, count=1, l = lab[0];   
 
     while( l >= 0 ){
         // l equals in
         rgb = lab2rgb( [l, lab[1], lab[2] ] );
-        brightness = getRelLuminance(rgb[0], rgb[1], rgb[2]);
-        contrast = getContrast(brightness,blum);
+        relLum = getRelLuminance(rgb[0], rgb[1], rgb[2]);
+        contrast = getContrast(relLum,blum);
 
         if( contrast >= c){
             return rgb;
         }
         
-        b1 = brightness;
+        b1 = relLum;
         l = l - (0.5*count);  
         count++;
     }
@@ -552,13 +554,13 @@ function adjustLightness(c, lab, blum, r, g, b){
     while( l <= 100 ){
         // l equals in
         rgb = lab2rgb( [l, lab[1], lab[2] ] );
-        brightness = getRelLuminance(rgb[0], rgb[1], rgb[2]);
-        contrast = getContrast(brightness,blum);
+        relLum = getRelLuminance(rgb[0], rgb[1], rgb[2]);
+        contrast = getContrast(relLum,blum);
         if( contrast >= c){
             return rgb;
         }
         
-        b2 = brightness;
+        b2 = relLum;
         l = l + (0.5*count);
         count++;
     }
@@ -570,42 +572,45 @@ function adjustLightness(c, lab, blum, r, g, b){
     }
     
 }
-function impairmentLightness(currentContrast, cSlider, lab, blum, r, g, b){
-    var contrast=0; var count=1;  var brightness, b1, b2;
-  
-    var rgb = [r,g,b];
-    var lab = rgb2lab(r,g,b);
-    var l = lab[0];   
-    var rgb2 = rgb;
-    // contrast = 2,    cSlider = 3
-    while( l >= 0 ){
-        rgb = lab2rgb( [l, lab[1], lab[2] ] );
-        brightness = getRelLuminance(rgb[0], rgb[1], rgb[2]);
-        contrast = getContrast(brightness,blum);
+function impairmentLightness(c, lab, blum, r, g, b){
+    var rgb, relLum, b1, b2;
+    var contrast=0, count=1, l = lab[0];   
 
-        if( contrast <= currentContrast*0.3){
+    while( l >= 0 ){
+        // l equals in
+        rgb = lab2rgb( [l, lab[1], lab[2] ] );
+        relLum = getRelLuminance(rgb[0], rgb[1], rgb[2]);
+        contrast = getContrast(relLum,blum);
+
+        if( contrast*1.7 >= c){
             return rgb;
         }
         
+        b1 = relLum;
         l = l - (0.5*count);  
         count++;
     }
     l = lab[0]; count = 1;
 
     while( l <= 100 ){
+        // l equals in
         rgb = lab2rgb( [l, lab[1], lab[2] ] );
-        brightness = getRelLuminance(rgb[0], rgb[1], rgb[2]);
-        contrast = getContrast(brightness,blum);
-
-        if( contrast <= currentContrast*0.3){
+        relLum = getRelLuminance(rgb[0], rgb[1], rgb[2]);
+        contrast = getContrast(relLum,blum);
+        if( contrast*1.7 >= c){
             return rgb;
         }
         
+        b2 = relLum;
         l = l + (0.5*count);
         count++;
     }
     
-    return rgb2;
+    if(  Math.abs(b2-blum) > Math.abs(b1-blum) ){
+        return [255,255,255];
+    }else{
+        return [0,0,0];
+    }
     
 }
 
