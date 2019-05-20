@@ -1,6 +1,8 @@
 # Colour Contrast Visualizer
 <img src="https://github.com/fhansen1/colour-contrast/blob/master/img/logo.png?raw=true" title="Colour contrast visualizer" alt="Logo">
 
+##   
+
 <a href ="https://fhansen1.github.io/colour-contrast/">Demo</a>
 
 ## About
