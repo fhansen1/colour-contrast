@@ -17,6 +17,6 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 
 ## Acknowledgments
 
-* Hat tip to anyone whose code was used
+* <a href="https://github.com/antimatter15/rgb-lab">RGB to LAB</>
 * Inspiration
 * etc
