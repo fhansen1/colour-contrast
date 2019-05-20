@@ -1,5 +1,5 @@
 # Colour Contrast Visualizer
-<img src="https://avatars1.githubusercontent.com/u/4284691?v=3&s=200" title="FVCproductions" alt="FVCproductions">
+<img src="https://github.com/fhansen1/colour-contrast/blob/master/img/logo.png?raw=true" title="Colour contrast visualizer" alt="Logo">
 One Paragraph of project description goes here
 
 ## Getting Started
