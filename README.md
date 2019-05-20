@@ -1,8 +1,8 @@
 # Colour Contrast Visualizer
 <img src="https://github.com/fhansen1/colour-contrast/blob/master/img/logo.png?raw=true" title="Colour contrast visualizer" alt="Logo">
-<br/>
+##
 <a href ="https://fhansen1.github.io/colour-contrast/">Demo</a>
-<br/>
+##
 ## About
 
 The tool will take an image of a design, scan it and output the relevant foreground colours. If the colours do not satisfy the WCAG2.0 guidelines, adjusted colours will be proposed and drawn over the uploaded design.
