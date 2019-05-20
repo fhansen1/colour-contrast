@@ -3,7 +3,8 @@
 
 ## About
 
-The tool will take an image of a design, scan it and output the relevant foreground colours. If the colours do not satisfy the WCAG2.0 guidelines, adjusted colours will be proposed and drawn over the uploaded design.
+The tool will take an image of a design, scan it and output the relevant foreground colours. If the colours do not satisfy the WCAG2.0 guidelines, adjusted colours will be proposed and drawn over the uploaded design.</br>
+<a href ="https://fhansen1.github.io/colour-contrast/">Demo</a>
 
 ## Getting Started
 
