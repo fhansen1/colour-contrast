@@ -1,0 +1,17 @@
+﻿WEBVTT
+
+1
+00:00:00.000 --> 00:00:03.000
+The first slider on the left adjusts the contrast ratio
+
+2
+00:00:03.000 --> 00:00:06.000
+moving the slider to the left will decrease the contrast ratio
+
+3
+00:00:06.000 --> 00:00:09.000
+while moving it to the right will increase the contrast ratio
+
+4
+00:00:11.000 --> 00:00:16.000
+the slider will have an effect on both the canvas and the colour analysis

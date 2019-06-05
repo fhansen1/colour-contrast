@@ -1,0 +1,53 @@
+﻿WEBVTT
+
+1
+00:00:00.000 --> 00:00:03.000
+The colour analysis box shows the orginal detected colours
+
+2
+00:00:03.000 --> 00:00:06.000
+as well as the corrected colours based directly on the
+
+3
+00:00:06.000 --> 00:00:08.000
+positions of the sliders
+
+4
+00:00:08.000 --> 00:00:12.000
+the histogram in the middle shows the original detected colours
+
+5
+00:00:12.000 --> 00:00:14.000
+as well as the background colour 
+
+6
+00:00:14.000 --> 00:00:17.000
+the colour circle of hue and lightness shows the direction
+
+7
+00:00:17.000 --> 00:00:19.000
+the foreground colours have been corrected towards
+
+8
+00:00:19.000 --> 00:00:24.000
+the saturation of the circle can be toggled on or off with the left mouse button
+
+9
+00:00:24.000 --> 00:00:27.000
+the two columns show the original detected foreground colours
+
+10
+00:00:27.000 --> 00:00:29.000
+and their corrected counterparts 
+
+10
+00:00:29.000 --> 00:00:32.000
+any of the foreground colours can be viewed on the detected 
+
+10
+00:00:32.000 --> 00:00:35.000
+background colour to see if they satisfy the criteria
+
+10
+00:00:35.000 --> 00:00:41.000
+any of the colours can also be copied to the clipboard with the left mouse button for further use

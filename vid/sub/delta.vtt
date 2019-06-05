@@ -1,0 +1,33 @@
+﻿WEBVTT
+
+1
+00:00:00.000 --> 00:00:03.000
+The second slider adjusts the delta-e range
+
+2
+00:00:03.000 --> 00:00:05.000
+also known as the colour difference
+
+3
+00:00:05.000 --> 00:00:08.000
+moving the minimum slider leftwards increases 
+
+4
+00:00:08.000 --> 00:00:10.000
+the sensitivity and similarity of the foreground
+
+5
+00:00:10.000 --> 00:00:13.000
+colours being detected 
+
+6
+00:00:13.000 --> 00:00:15.000
+moving the maximum slider leftwards decreases
+
+7
+00:00:15.000 --> 00:00:17.000
+the colour difference and results in more
+
+8
+00:00:18.000 --> 00:00:21.000
+similar detected foreground colours
