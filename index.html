@@ -41,7 +41,7 @@
                 <p id="deltaControl">​</p>
                 <div id="deltaSliderCombine" type="text"></div>
 
-                <p>Simulate visual impairment <img class='help' src="img/q.png" height="14" width="14" alt="Question mark"></p>
+                <p>Simulate visual impairment <img class='help' src="img/q.png" height="14" width="14" onclick="impairmentModal.open()" alt="Question mark"></p>
                 <button id="impairToggle" class="tingle-btn tingle-btn--primary" onclick="toggleImpairment()">Off</button>
             </div>
             <div class="analyzer">
@@ -85,7 +85,7 @@
 <script src="plugins/noUiSlider/nouislider.min.js"></script>
 <script src="plugins/tingle/tingle.min.js"></script>
 <script src="js/colour-contrast.min.js"></script>
-<script src="js/extras.min.js"></script>
+<script src="js/extras.js"></script>
 <script src="js/colour-conversions.min.js"></script>
 <style>
 

@@ -138,7 +138,9 @@ var analysingContent = '<h1>Analysis target</h1>';
     analysingContent += '<p>By selecting a target for analysis WCAG2.0 badges will appear while hovering colours in the "Colour analysis" column if they meet the criteria.</p>';
     analysingContent += '<img src="img/analysing2.png" alt="Calculated colour information example" />';
     analysingContent += '<img src="img/hover.png" alt="Pointer hovering calculated colour"/>';
-    analysingContent += '<p><a href="https://www.w3.org/TR/WCAG20/#visual-audio-contrast" target="_blank">More information</p>';
+    analysingContent += '<p><a href="https://www.w3.org/TR/WCAG20/#visual-audio-contrast" target="_blank">More information</a></p>';
+    analysingContent += '<p>Video Tutorial:<p>'
+    analysingContent += '<video width="640" height="360" controls><source src="vid/analysis.mp4" type="video/mp4"><track label="English" kind="subtitles" srclang="en" src="vid/sub/analysis.vtt" default></video>';
 analysingModal.setContent(analysingContent);
 
 // add a button
@@ -161,7 +163,9 @@ var startContent = '<h1>Introduction</h1>';
     startContent += '<p>In order for designs to be accessible for most people multiple factors must be taken into account. An important factor in accessibility is <b>contrast</b>.</p>';
     startContent += '<p>This tool attempts to make contrast easy by visualising suggested changes in real-time and making the new colour values readily available.</p>';
     startContent += '<p><b>Click the <img class="help" src="img/q.png" height="14" width="14">-marks for guidance.</b></p>';
-    startContent += '<p><a href="https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html" target="_blank">Read more about the WCAG2.0 guidelines</p>';
+    startContent += '<p><a href="https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html" target="_blank">Read more about the WCAG2.0 guidelines</a></p>';
+    startContent += '<p>Video Tutorial:<p>:'
+    startContent += '<video width="640" height="360" controls><source src="vid/introduction.mp4" type="video/mp4"><track label="English" kind="subtitles" srclang="en" src="vid/sub/introduction.vtt" default></video>';
 startModal.setContent(startContent);
 
 // add a button
@@ -184,7 +188,9 @@ var deltaContent = '<h1>ΔE* range</h1>';
     deltaContent += '<p>The ΔE* is the perceptual difference between the background and the foreground colour. The bigger the ΔE* the easier it is for humans to distinguish different colours. Adjust the range to pinpoint the colours you would like to analyze. Adjusting the minimum value will usually suffice.</p>';
     deltaContent += '<p>The ΔE* in this application is the perceptual difference between the detected background and current foreground colours.';
     deltaContent += '<p><b>Note: Only colours within the ΔE* range will be considered.</b></p>';
-    deltaContent += '<p><a href="http://www.colorwiki.com/wiki/Delta_E:_The_Color_Difference" target="_blank">More information</p>';
+    deltaContent += '<p><a href="http://www.colorwiki.com/wiki/Delta_E:_The_Color_Difference" target="_blank">More information</a></p>';
+    deltaContent += '<p>Video Tutorial:<p>:';
+    deltaContent += '<video width="640" height="360" controls><source src="vid/delta.mp4" type="video/mp4"><track label="English" kind="subtitles" srclang="en" src="vid/sub/delta.vtt" default></video>';
 deltaModal.setContent(deltaContent);
 
 // add a button
@@ -205,6 +211,8 @@ var contrastContent = '<h1>Contrast adjustments</h1>';
     contrastContent += '<img src="img/contrast.png" alt="Contrast slider example"/>';
     contrastContent += '<p>Contrast is the brightness ratio between two colours. Increasing the slider will increase the brightness ratio by making the foreground either darker or brighter.</p>';
     contrastContent += '<p>Contrast is calculated according to <a href="https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html" target="_blank">WCAG2.0</a> standards.</p>';
+    contrastContent += '<p>Video Tutorial:<p>:';
+    contrastContent += '<video width="640" height="360" controls><source src="vid/contrast.mp4" type="video/mp4"><track label="English" kind="subtitles" srclang="en" src="vid/sub/contrast.vtt" default></video>';
 contrastModal.setContent(contrastContent);
 
 // add a button
@@ -229,6 +237,8 @@ var analysisModalContent = '<h1>Colour Analysis</h1>';
     analysisModalContent += '<img src="img/histogram-corrections.png" alt="Histogram of detected colours. Colours with too little and their corrections is also shown."/>';
     analysisModalContent += '<p>The histogram shows the order of the colours based on occurences in the analyzed image. While the order is true - the scale is not. Lastly, in the left column, the old colours which need correction are listed. To the right are the suggested, corrected colours.</p>';
     analysisModalContent += '<p><b>Hover any of the colours for more information. Clicking any of them will copy its RGB value to the clipboard.</b></p>'
+    analysisModalContent += '<p>Video Tutorial:<p>';
+    analysisModalContent += '<video width="640" height="360" controls><source src="vid/colour.mp4" type="video/mp4"><track label="English" kind="subtitles" srclang="en" src="vid/sub/colour.vtt" default></video>';
 analysisModal.setContent(analysisModalContent);
     analysisModalContent = null;
 // add a button
