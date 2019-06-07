@@ -285,7 +285,7 @@ function changeConstrastImage(imgData){
             contrast = getContrast(lumF,lumB);
 
             //if within delta values and contrast is less than slider value
-            if( (ciede2000(lab,bgLab) > dMinSlider) && (ciede2000(lab,bgLab) < dMaxSlider) && (cSlider > contrast) ) {
+            if( (ciede2000(lab,bgLab) > dMinSlider) && (ciede2000(lab,bgLab) < dMaxSlider)  ) {
                
                 if(!impairment){
                     var newRgb = adjustLightness(cSlider, lab, lumB, r, g, b);

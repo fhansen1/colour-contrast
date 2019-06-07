@@ -129,7 +129,13 @@ var analysingModal = new tingle.modal({
     stickyFooter: false,
     closeMethods: ['overlay', 'button', 'escape'],
     closeLabel: "Close",
-    cssClass: ['custom-class-1', 'custom-class-2']
+    cssClass: ['custom-class-1', 'custom-class-2'],
+    onClose: function() {
+            var vids = document.getElementsByTagName('video'); 
+              for( var i = 0; i < vids.length; i++ ){ 
+                  vids.item(i).pause();
+              }
+    }
 });
 
 // set content
@@ -154,7 +160,13 @@ var startModal = new tingle.modal({
     stickyFooter: false,
     closeMethods: ['overlay', 'button', 'escape'],
     closeLabel: "Close",
-    cssClass: ['custom-class-1', 'custom-class-2']
+    cssClass: ['custom-class-1', 'custom-class-2'],
+        onClose: function() {
+            var vids = document.getElementsByTagName('video'); 
+              for( var i = 0; i < vids.length; i++ ){ 
+                  vids.item(i).pause();
+              }
+    }
 });
 
 // set content
@@ -179,7 +191,13 @@ var deltaModal = new tingle.modal({
     stickyFooter: false,
     closeMethods: ['overlay', 'button', 'escape'],
     closeLabel: "Close",
-    cssClass: ['custom-class-1', 'custom-class-2']
+    cssClass: ['custom-class-1', 'custom-class-2'],
+        onClose: function() {
+            var vids = document.getElementsByTagName('video'); 
+              for( var i = 0; i < vids.length; i++ ){ 
+                  vids.item(i).pause();
+              }
+    }
 });
 
 // set content
@@ -203,7 +221,13 @@ var contrastModal = new tingle.modal({
     stickyFooter: false,
     closeMethods: ['overlay', 'button', 'escape'],
     closeLabel: "Close",
-    cssClass: ['custom-class-1', 'custom-class-2']
+    cssClass: ['custom-class-1', 'custom-class-2'],
+        onClose: function() {
+            var vids = document.getElementsByTagName('video'); 
+              for( var i = 0; i < vids.length; i++ ){ 
+                  vids.item(i).pause();
+              }
+    }
 });
 
 // set content
@@ -225,7 +249,13 @@ var analysisModal = new tingle.modal({
     stickyFooter: false,
     closeMethods: ['overlay', 'button', 'escape'],
     closeLabel: "Close",
-    cssClass: ['custom-class-1', 'custom-class-2']
+    cssClass: ['custom-class-1', 'custom-class-2'],
+    onClose: function() {
+            var vids = document.getElementsByTagName('video'); 
+              for( var i = 0; i < vids.length; i++ ){ 
+                  vids.item(i).pause();
+              }
+    }
 });
 
 // set content
@@ -238,13 +268,15 @@ var analysisModalContent = '<h1>Colour Analysis</h1>';
     analysisModalContent += '<p>The histogram shows the order of the colours based on occurences in the analyzed image. While the order is true - the scale is not. Lastly, in the left column, the old colours which need correction are listed. To the right are the suggested, corrected colours.</p>';
     analysisModalContent += '<p><b>Hover any of the colours for more information. Clicking any of them will copy its RGB value to the clipboard.</b></p>'
     analysisModalContent += '<p>Video Tutorial:<p>';
+    
     analysisModalContent += '<video width="640" height="360" controls><source src="vid/colour.mp4" type="video/mp4"><track label="English" kind="subtitles" srclang="en" src="vid/sub/colour.vtt" default></video>';
 analysisModal.setContent(analysisModalContent);
-    analysisModalContent = null;
+
 // add a button
 analysisModal.addFooterBtn('OK', 'tingle-btn tingle-btn--primary', function() {
     analysisModal.close();
 });
+
 
 
 /* Mobile check */
