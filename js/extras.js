@@ -141,7 +141,7 @@ var analysingModal = new tingle.modal({
 // set content
 var analysingContent = '<h1>Analysis target</h1>';
     analysingContent += '<img src="img/analysing.png" alt="Select box example"/>';
-    analysingContent += '<p>By selecting a target for analysis WCAG2.0 badges will appear while hovering colours in the "Colour analysis" column if they meet the criteria.</p>';
+    analysingContent += '<p>By selecting a target for analysis WCAG2.0, badges will appear while hovering over the colours in the "Colour analysis" column if they meet the criteria.</p>';
     analysingContent += '<img src="img/analysing2.png" alt="Calculated colour information example" />';
     analysingContent += '<img src="img/hover.png" alt="Pointer hovering calculated colour"/>';
     analysingContent += '<p><a href="https://www.w3.org/TR/WCAG20/#visual-audio-contrast" target="_blank">More information</a></p>';
@@ -172,8 +172,8 @@ var startModal = new tingle.modal({
 // set content
 var startContent = '<h1>Introduction</h1>';
     startContent += '<img src="img/text.png" alt="Examples of different sizes of text on different colours"/>';
-    startContent += '<p>In order for designs to be accessible for most people multiple factors must be taken into account. An important factor in accessibility is <b>contrast</b>.</p>';
-    startContent += '<p>This tool attempts to make contrast easy by visualising suggested changes in real-time and making the new colour values readily available.</p>';
+    startContent += '<p>In order for designs to be accessible for most people, multiple factors must be taken into account. An important factor in accessibility is <b>contrast</b>.</p>';
+    startContent += '<p>This tool attempts to make contrast easy by visualising the suggested changes in real-time and making the new colour values readily available.</p>';
     startContent += '<p><b>Click the <img class="help" src="img/q.png" height="14" width="14">-marks for guidance.</b></p>';
     startContent += '<p><a href="https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html" target="_blank">Read more about the WCAG2.0 guidelines</a></p>';
     startContent += '<p>Video Tutorial:<p>:'
@@ -203,7 +203,7 @@ var deltaModal = new tingle.modal({
 // set content
 var deltaContent = '<h1>ΔE* range</h1>';
     deltaContent += '<img src="img/delta.png" alt="Delta range slider example"/>';
-    deltaContent += '<p>The ΔE* is the perceptual difference between the background and the foreground colour. The bigger the ΔE* the easier it is for humans to distinguish different colours. Adjust the range to pinpoint the colours you would like to analyze. Adjusting the minimum value will usually suffice.</p>';
+    deltaContent += '<p>The ΔE* is the perceptual difference between the background and foreground colours. The bigger the ΔE* is, the easier it is for humans to distinguish between the different colours. Adjust the range to pinpoint the colours you would like to analyze. Adjusting the minimum value will usually suffice.</p>';
     deltaContent += '<p>The ΔE* in this application is the perceptual difference between the detected background and current foreground colours.';
     deltaContent += '<p><b>Note: Only colours within the ΔE* range will be considered.</b></p>';
     deltaContent += '<p><a href="http://www.colorwiki.com/wiki/Delta_E:_The_Color_Difference" target="_blank">More information</a></p>';
@@ -234,6 +234,7 @@ var contrastModal = new tingle.modal({
 var contrastContent = '<h1>Contrast adjustments</h1>';
     contrastContent += '<img src="img/contrast.png" alt="Contrast slider example"/>';
     contrastContent += '<p>Contrast is the brightness ratio between two colours. Increasing the slider will increase the brightness ratio by making the foreground either darker or brighter.</p>';
+    contrastContent += '<p><b>E.G.</b> The foreground colours will become darker on a light background and vice versa.</p>';
     contrastContent += '<p>Contrast is calculated according to <a href="https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html" target="_blank">WCAG2.0</a> standards.</p>';
     contrastContent += '<p>Video Tutorial:<p>:';
     contrastContent += '<video width="640" height="360" controls><source src="vid/contrast.mp4" type="video/mp4"><track label="English" kind="subtitles" srclang="en" src="vid/sub/contrast.vtt" default></video>';
